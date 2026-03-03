@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>英文聽寫練習機 (V3.6.0 錯題本強化版)</title>
+    <style>
+        /* ------------------- CSS 樣式 ------------------- */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px; 
+            color: #333;
+        }
+        
+        body, .key, .letter-slot {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        #game-container {
+            width: 95%; 
+            max-width: 900px; 
+            border: 5px solid #a4e2ff; 
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+        }
+
+        h2 { color: #4a90e2; }
+
+        #selection-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        #grade-buttons-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px; 
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        #unit-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px; 
+            margin-bottom: 15px;
+            min-height: 50px;
+        }
+
+        .unit-btn {
+            padding: 8px 15px;
+            font-size: 16px;
+            border: 2px solid #ffb3c1; 
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: all 0.1s;
+        }
+        
+        .grade-btn { 
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .unit-btn.selected {
+            background-color: #4a90e2; 
+            color: white;
+            border-color: #4a90e2;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 錯題本專用顏色 */
+        #review-book-btn {
+            background-color: #fff0f3;
+            border-color: #ffb3c1;
+            color: #d63384;
+        }
+        #review-book-btn.selected {
+            background-color: #ffb3c1;
+            color: white;
+        }
+        
+        #review-status {
+            font-size: 18px;
+            color: #d9534f;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        #hint-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 20px;
+            min-height: 30px;
+        }
+
+        #input-area {
+            display: flex;
+            justify-content: center;
+            gap: 10px; 
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .letter-slot {
+            width: 50px; 
+            height: 60px; 
+            line-height: 60px;
+            font-size: 34px; 
+            font-weight: bold;
+            border: 3px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            color: #333;
+        }
+
+        .space-slot {
+            width: 25px; 
+            height: 60px;
+            background-color: transparent;
+            border: none;
+        }
+
+        #keyboard {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px; 
+            margin-top: 20px;
+        }
+
+        .key {
+            background-color: #a4e2ff; 
+            color: #333; 
+            border: none;
+            padding: 15px 0; 
+            font-size: 24px; 
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .key:active { background-color: #79c5f0; }
+        #delete-key { background-color: #777; color: white; font-size: 20px; }
+
+        #control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px; 
+            margin-top: 30px;
+        }
+
+        .control-btn {
+            padding: 15px 30px; 
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px #999;
+        }
+
+        .control-btn:active {
+            box-shadow: 0 0 #999;
+            transform: translateY(4px);
+        }
+
+        #repeat-btn { background-color: #5cb85c; color: white; }
+        #check-btn { background-color: #f0ad4e; color: white; }
+        #answer-btn { background-color: #5bc0de; color: white; }
+        
+        .control-btn:disabled {
+            opacity: 0.5; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+            transform: none; 
+        }
+
+        .correct { background-color: #aaffaa !important; border-color: #4CAF50 !important; }
+        .incorrect { background-color: #ffaaaa !important; border-color: #f44336 !important; }
+        .skipped { background-color: #ffe4b2 !important; border-color: #ff8c00 !important; }
+
+        #feedback-message {
+            font-size: 24px; 
+            font-weight: bold;
+            min-height: 35px;
+            margin-top: 15px;
+            color: #4a90e2;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <h2>☁️ 英文聽寫練習機 V3.6.0</h2>
+        
+        <div id="review-status"></div>
+
+        <div id="selection-controls">
+            <div id="grade-buttons-container">
+                <button class="grade-btn unit-btn" data-grade="G1" onclick="selectGrade(this)">G1 一年級</button>
+                <button class="grade-btn unit-btn" data-grade="G2" onclick="selectGrade(this)">G2 二年級</button>
+                <button id="review-book-btn" class="grade-btn unit-btn" onclick="startWrongWordMode()">🎯 挑戰錯題本</button>
+            </div>
+
+            <div id="unit-buttons-container">
+                請先選擇年級
+            </div>
+        </div>
+
+        <div id="hint-display">請先選擇年級和單元按鈕，然後點擊開始！</div>
+        
+        <div id="input-area"></div>
+
+        <div id="control-buttons">
+            <button id="start-btn" class="control-btn" onclick="handleStartNext()" disabled>開始遊戲</button> 
+            <button id="repeat-btn" class="control-btn" disabled>🔈 重複唸一次</button>
+            <button id="check-btn" class="control-btn" disabled>✅ 檢查拼寫</button>
+            <button id="answer-btn" class="control-btn" onclick="showAnswer()" disabled>📖 看解答</button>
+        </div>
+
+        <div id="feedback-message"></div>
+
+        <div id="keyboard"></div>
+    </div>
+
+    <script>
+        // --- 單字庫資料 (保持不變) ---
+        const allWordUnits = {
+            "G1": {
+                "U1": [{ word: "HE IS", hint: "他是" }, { word: "I AM", hint: "我是" }, { word: "NAME", hint: "名字" }, { word: "SHE IS", hint: "她是" }, { word: "THE", hint: "這個" }, { word: "THIS", hint: "這個" }, { word: "YOU ARE", hint: "你是" }, { word: "WHAT", hint: "什麼" }],
+                "U2": [{ word: "THAT", hint: "那個" }, { word: "AND", hint: "和" }, { word: "OUR", hint: "我們的" }, { word: "HER", hint: "她的" }, { word: "HIS", hint: "他的" }, { word: "MY", hint: "我的" }, { word: "OPEN", hint: "打開" }, { word: "YOUR", hint: "你的" }, { word: "THEY", hint: "他們" }, { word: "CLOSE", hint: "關上" }, { word: "WE", hint: "我們" }, { word: "THEIR", hint: "他們的" }],
+                "U3": [{ word: "SCHOOL", hint: "學校" }, { word: "GOOD", hint: "好的" }, { word: "FIRST GRADE", hint: "一年級" }, { word: "HELLO", hint: "哈囉" }, { word: "IN", hint: "在" }, { word: "NO", hint: "不" }, { word: "NOT", hint: "不" }, { word: "TOO", hint: "也是" }, { word: "WHO", hint: "誰" }, { word: "YES", hint: "是" }],
+                "U4": [{ word: "WHITE", hint: "白色" }, { word: "ORANGE", hint: "橘色" }, { word: "BLACK", hint: "黑色" }, { word: "GREEN", hint: "綠色" }, { word: "YELLOW", hint: "黃色" }, { word: "BLUE", hint: "藍色" }, { word: "COLOR", hint: "顏色" }, { word: "PINK", hint: "粉紅色" }, { word: "RED", hint: "紅色" }, { word: "WHOSE", hint: "誰的" }],
+                "U5": [{ word: "WHERE", hint: "哪裡" }, { word: "GROUP", hint: "組" }, { word: "THERE IS", hint: "有 (單數)" }, { word: "CLASSROOM", hint: "教室" }, { word: "IT", hint: "它" }, { word: "THERE ARE", hint: "有 (複數)" }, { word: "TELL", hint: "告訴" }, { word: "AT", hint: "在於" }, { word: "GO", hint: "去" }, { word: "ON", hint: "在...上面" }],
+                "U6": [{ word: "DRAW", hint: "畫畫" }, { word: "READ", hint: "閱讀" }, { word: "COUNT", hint: "數數" }, { word: "WRITE", hint: "寫" }, { word: "CAN", hint: "可以" }, { word: "CANT", hint: "不可以" }, { word: "CANNOT", hint: "不可以" }, { word: "EAT", hint: "吃" }, { word: "RUN", hint: "跑" }, { word: "SLEEP", hint: "睡覺" }],
+                "U7": [{ word: "THESE", hint: "這些" }, { word: "THOSE", hint: "那些" }, { word: "COME TO", hint: "來" }, { word: "TWO", hint: "二" }, { word: "WALK TO", hint: "走到" }, { word: "BY BUS", hint: "搭公車" }, { word: "FOUR", hint: "四" }, { word: "HOW", hint: "如何" }, { word: "ONE", hint: "一" }, { word: "THREE", hint: "三" }],
+                "U8": [{ word: "DOES", hint: "做" }, { word: "HOMEWORK", hint: "家庭作業" }, { word: "DOESNT", hint: "不 (doesn't)" }, { word: "KNOW", hint: "知道" }, { word: "WITH", hint: "和" }, { word: "DONT", hint: "不 (don't)" }, { word: "KICK", hint: "踢" }, { word: "LETS", hint: "讓我們" }, { word: "WANT TO", hint: "想要" }, { word: "JUMP", hint: "跳" }, { word: "DO", hint: "做" }, { word: "PLAY", hint: "玩" }],
+                "U9": [{ word: "EIGHT", hint: "八" }, { word: "ELEVEN", hint: "十一" }, { word: "WHAT TIME", hint: "幾點鐘" }, { word: "TWELVE", hint: "十二" }, { word: "FIVE", hint: "五" }, { word: "FOR", hint: "給" }, { word: "NINE", hint: "九" }, { word: "SEVEN", hint: "七" }, { word: "SIX", hint: "六" }, { word: "TEN", hint: "十" }],
+                "U10": [{ word: "WINDY", hint: "風大的" }, { word: "DRY", hint: "乾的" }, { word: "WARM", hint: "溫暖的" }, { word: "RAINY", hint: "下雨的" }, { word: "COLD", hint: "寒冷的" }, { word: "HOT", hint: "炎熱的" }, { word: "OR", hint: "或者" }, { word: "SUNNY", hint: "晴朗的" }, { word: "TODAY", hint: "今天" }, { word: "WET", hint: "潮濕的" }]
+            },
+            "G2": {
+                "U1": [{ word: "FINGER", hint: "手指頭" }, { word: "THUMB", hint: "大拇指" }, { word: "BODY", hint: "身體" }, { word: "TOE", hint: "腳趾" }, { word: "LEG", hint: "腿" }, { word: "BACK", hint: "背" }, { word: "ARM", hint: "手臂" }, { word: "HAND", hint: "手" }, { word: "FOOT", hint: "腳 (單數)" }, { word: "FEET", hint: "腳 (複數)" }, { word: "HAVE", hint: "有(I/You/We)" }, { word: "HAS", hint: "有(She/He/It)" }],
+                "U2": [{ word: "EYE", hint: "眼睛" }, { word: "EAR", hint: "耳朵" }, { word: "HAIR", hint: "頭髮" }, { word: "MOUTH", hint: "嘴巴" }, { word: "NOSE", hint: "鼻子" }, { word: "BIG", hint: "大的" }, { word: "LITTLE", hint: "小的" }, { word: "SHORT", hint: "短的" }, { word: "LONG", hint: "長的" }, { word: "NOW", hint: "現在" }],
+                "U3": [{ word: "COAT", hint: "外套" }, { word: "SHIRT", hint: "襯衫" }, { word: "PANTS", hint: "褲子" }, { word: "SHORTS", hint: "短褲" }, { word: "SKIRT", hint: "裙子" }, { word: "SOCKS", hint: "襪子" }, { word: "SHOES", hint: "鞋子" }, { word: "DRESS", hint: "洋裝" }, { word: "SWEATER", hint: "毛衣" }, { word: "GLASSES", hint: "眼鏡" }],
+                "U4": [{ word: "TIRED", hint: "疲倦的" }, { word: "HAPPY", hint: "快樂的" }, { word: "SAD", hint: "悲傷的" }, { word: "BORED", hint: "無聊的" }, { word: "ANGRY", hint: "生氣的" }, { word: "CRAZY", hint: "瘋狂的" }, { word: "HUNGRY", hint: "肚子餓的" }, { word: "THIRSTY", hint: "口渴的" }, { word: "SICK", hint: "生病的" }, { word: "SCARED", hint: "害怕的" }],
+                "U5": [{ word: "DECEMBER", hint: "十二月" }, { word: "MONTH", hint: "月" }, { word: "JANUARY", hint: "一月" }, { word: "FEBRUARY", hint: "二月" }, { word: "MARCH", hint: "三月" }, { word: "APRIL", hint: "四月" }, { word: "MAY", hint: "五月" }, { word: "JUNE", hint: "六月" }, { word: "JULY", hint: "七月" }, { word: "AUGUST", hint: "八月" }, { word: "SEPTEMBER", hint: "九月" }, { word: "OCTOBER", hint: "十月" }, { word: "NOVEMBER", hint: "十一月" }],
+                "U6": [{ word: "BIRTHDAY", hint: "生日" }, { word: "GIFT", hint: "禮物" }, { word: "THANKS", hint: "謝謝" }, { word: "FROM", hint: "從.../來自" }, { word: "US", hint: "我們 (受格)" }, { word: "COMPUTER", hint: "電腦" }, { word: "GAME", hint: "遊戲" }, { word: "ME", hint: "我 (受格)" }, { word: "YOU", hint: "你(受格)" }, { word: "HIM", hint: "他 (受格)" }, { word: "THEM", hint: "他們 (受格)" }, { word: "TALK", hint: "說話" }, { word: "SING", hint: "唱歌" }, { word: "SONG", hint: "歌曲" }, { word: "STORY", hint: "故事" }],
+                "U7": [{ word: "FAMILY", hint: "家庭" }, { word: "BROTHER", hint: "兄弟或弟" }, { word: "SISTER", hint: "姊姊或妹" }, { word: "PEOPLE", hint: "人們(當複數用)" }, { word: "FATHER", hint: "父親" }, { word: "AUNT", hint: "姑姑或阿姨" }, { word: "MOTHER", hint: "母親" }, { word: "UNCLE", hint: "伯父或叔叔" }, { word: "COUSIN", hint: "堂(表)兄、弟、姊、妹" }, { word: "GRANDFATHER", hint: "祖父" }, { word: "GRANDMOTHER", hint: "祖母" }, { word: "MANY", hint: "很多的" }, { word: "BECAUSE", hint: "因為" }],
+                "U8": [{ word: "AFRAID", hint: "害怕的" }, { word: "PET", hint: "寵物" }, { word: "DOG", hint: "狗" }, { word: "BUT", hint: "但是" }, { word: "LIKE/LIKES", hint: "喜歡" }, { word: "CAT", hint: "貓" }, { word: "ANIMAL", hint: "動物" }, { word: "HAMSTER", hint: "倉鼠" }, { word: "TURTLE", hint: "烏龜" }, { word: "SNAKE", hint: "蛇" }, { word: "FISH", hint: "魚" }, { word: "BIRD", hint: "鳥" }, { word: "LIZARD", hint: "蜥蜴" }],
+                "U9": [{ word: "KITCHEN", hint: "廚房" }, { word: "DOING", hint: "做" }, { word: "BEDROOM", hint: "臥室" }, { word: "BATHROOM", hint: "浴室" }, { word: "DINING ROOM", hint: "飯廳" }, { word: "STUDY", hint: "書房" }, { word: "LIVING ROOM", hint: "客廳" }, { word: "READING", hint: "閱讀" }, { word: "COOKING", hint: "煮飯" }, { word: "WATCHING", hint: "看" }, { word: "TV", hint: "電視" }, { word: "SLEEPING", hint: "睡覺" }, { word: "EATING", hint: "吃" }, { word: "WASHING", hint: "洗" }, { word: "WRITING", hint: "寫" }],
+                "U10": [{ word: "DESK", hint: "書桌" }, { word: "UNDER", hint: "在...下面" }, { word: "BED", hint: "床" }, { word: "TABLE", hint: "桌子" }, { word: "CLOSET", hint: "衣櫥" }, { word: "BATHTUB", hint: "浴缸" }, { word: "SINK", hint: "水槽" }, { word: "CHAIR", hint: "椅子" }, { word: "REFRIGERATOR", hint: "冰箱" }, { word: "STOVE", hint: "火爐" }, { word: "SOFA", hint: "沙發" }, { word: "BESIDE", hint: "在...旁邊" }, { word: "PUT", hint: "放" }]
+            }
+        };
+
+        // 遊戲狀態變數
+        let currentWord = "";
+        let currentSpelling = [];
+        let currentWordList = [];
+        let wordIndex = 0;
+        let errorList = [];
+        let isReviewMode = false;
+        let isGameActive = false; 
+        let currentGrade = null; 
+        let selectedUnits = []; 
+        const keys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+        
+        // DOM 元素
+        const hintDisplay = document.getElementById('hint-display');
+        const reviewStatus = document.getElementById('review-status');
+        const unitButtonsContainer = document.getElementById('unit-buttons-container'); 
+        const inputArea = document.getElementById('input-area');
+        const startBtn = document.getElementById('start-btn');
+        const repeatBtn = document.getElementById('repeat-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const answerBtn = document.getElementById('answer-btn');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const reviewBookBtn = document.getElementById('review-book-btn');
+
+        const synth = window.speechSynthesis;
+        let englishVoice = null;
+
+        // --- 錯題本核心功能 (localStorage) ---
+        
+        function saveToWrongWordBook(wordData) {
+            let book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
+            if (!book.find(w => w.word === wordData.word)) {
+                book.push(wordData);
+                localStorage.setItem('wrongWords', JSON.stringify(book));
+            }
+        }
+
+        function removeFromWrongWordBook(wordText) {
+            let book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
+            book = book.filter(w => w.word !== wordText);
+            localStorage.setItem('wrongWords', JSON.stringify(book));
+        }
+
+        function startWrongWordMode() {
+            let book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
+            if (book.length === 0) {
+                alert("目前錯題本是空的，真棒！繼續保持喔！");
+                return;
+            }
+
+            currentWordList = [...book];
+            currentWordList.sort(() => Math.random() - 0.5); 
+            wordIndex = 0;
+            errorList = [];
+            isGameActive = true;
+            isReviewMode = true; // 標記為錯題挑戰模式
+
+            document.querySelectorAll('.unit-btn').forEach(btn => btn.classList.remove('selected'));
+            reviewBookBtn.classList.add('selected');
+            reviewStatus.textContent = `🔥 正在挑戰錯題本：共 ${currentWordList.length} 題`;
+            
+            loadNextWord();
+        }
+
+        // --- 介面邏輯 ---
+
+        function selectGrade(clickedButton) {
+            const grade = clickedButton.dataset.grade;
+            document.querySelectorAll('.grade-btn').forEach(btn => btn.classList.remove('selected'));
+            currentGrade = grade;
+            clickedButton.classList.add('selected');
+            loadUnits(currentGrade);
+        }
+
+        function loadUnits(grade) {
+            unitButtonsContainer.innerHTML = '';
+            if (!isGameActive) selectedUnits = []; 
+            
+            if (grade && allWordUnits[grade]) {
+                const units = allWordUnits[grade];
+                Object.keys(units).forEach(unit => {
+                    const button = document.createElement('button');
+                    button.className = 'unit-btn';
+                    if (selectedUnits.includes(unit)) button.classList.add('selected');
+                    button.textContent = `${unit} (${units[unit].length})`; 
+                    button.dataset.unit = unit; 
+                    if (isGameActive) button.disabled = true;
+                    else button.onclick = toggleUnitSelection; 
+                    unitButtonsContainer.appendChild(button);
+                });
+            } else {
+                 unitButtonsContainer.innerHTML = '請先選擇年級';
+            }
+            checkSelectionStatus();
+        }
+
+        function toggleUnitSelection() {
+            if (isGameActive) return;
+            const unit = this.dataset.unit;
+            const index = selectedUnits.indexOf(unit);
+            if (index > -1) {
+                selectedUnits.splice(index, 1);
+                this.classList.remove('selected');
+            } else {
+                selectedUnits.push(unit);
+                this.classList.add('selected');
+            }
+            checkSelectionStatus();
+        }
+
+        function checkSelectionStatus() {
+            if (currentGrade && selectedUnits.length > 0) {
+                startBtn.disabled = false;
+                startBtn.textContent = '開始遊戲';
+                hintDisplay.textContent = `已選擇 ${currentGrade} 的 ${selectedUnits.length} 個單元，點擊開始遊戲！`;
+            } else {
+                startBtn.disabled = true;
+                hintDisplay.textContent = currentGrade ? '請選擇要練習的課別！' : '請先選擇年級！';
+            }
+        }
+        
+        // --- 遊戲流程 ---
+
+        function handleStartNext() {
+            if (!isGameActive) {
+                startGameSetup(); 
+            } else {
+                if (startBtn.textContent === '下一個單字' && wordIndex < currentWordList.length) {
+                    skipCurrentWord();
+                } else {
+                    loadNextWord();
+                }
+            }
+        }
+
+        function startGameSetup() {
+            if (!currentGrade || selectedUnits.length === 0) return;
+            currentWordList = [];
+            errorList = [];
+            selectedUnits.forEach(unit => {
+                currentWordList = currentWordList.concat(allWordUnits[currentGrade][unit]);
+            });
+            currentWordList.sort(() => Math.random() - 0.5); 
+            wordIndex = 0;
+            isGameActive = true; 
+            isReviewMode = false;
+            document.querySelectorAll('.unit-btn').forEach(btn => btn.disabled = true);
+            startBtn.textContent = '下一個單字';
+            loadNextWord();
+        }
+
+        function skipCurrentWord() {
+            const currentWordData = currentWordList[wordIndex];
+            if (!errorList.find(w => w.word === currentWordData.word)) {
+                errorList.push(currentWordData);
+                saveToWrongWordBook(currentWordData); // 跳過也算錯，存入錯題本
+            }
+            wordIndex++;
+            loadNextWord();
+        }
+
+        function loadNextWord() {
+            if (wordIndex >= currentWordList.length) {
+                handleRoundEnd();
+                return;
+            }
+            
+            const wordData = currentWordList[wordIndex];
+            currentWord = wordData.word;
+            currentSpelling = [];
+            
+            inputArea.innerHTML = '';
+            feedbackMessage.textContent = '';
+            repeatBtn.disabled = false;
+            answerBtn.disabled = false; 
+            checkBtn.disabled = true;
+            startBtn.textContent = '下一個單字'; 
+            startBtn.disabled = false;
+
+            const unitInfo = isReviewMode ? "錯題挑戰" : `第 ${wordIndex + 1}/${currentWordList.length} 題`;
+            hintDisplay.textContent = `[${unitInfo}] ${wordData.hint}`;
+
+            let letterIndex = 0;
+            currentWord.split('').forEach(char => {
+                if (char === ' ') {
+                    const spaceSlot = document.createElement('div');
+                    spaceSlot.className = 'space-slot';
+                    inputArea.appendChild(spaceSlot);
+                } else {
+                    const slot = document.createElement('div');
+                    slot.className = 'letter-slot';
+                    slot.id = `slot-${letterIndex}`;
+                    inputArea.appendChild(slot);
+                    letterIndex++;
+                }
+            });
+            
+            readWord(currentWord);
+            checkBtn.textContent = '✅ 檢查拼寫'; 
+            checkBtn.onclick = checkSpelling; 
+            startBtn.onclick = handleStartNext;
+        }
+
+        function handleRoundEnd() {
+             if (errorList.length > 0) {
+                setTimeout(() => {
+                    if (confirm(`🎉 本輪完成！有 ${errorList.length} 個單字需要複習。現在開始複習嗎？`)) {
+                        currentWordList = [...errorList];
+                        wordIndex = 0;
+                        errorList = [];
+                        reviewStatus.textContent = `🔴 錯誤複習模式：共 ${currentWordList.length} 題`;
+                        loadNextWord();
+                    } else {
+                        endGame();
+                    }
+                }, 500);
+            } else {
+                endGame();
+            }
+        }
+        
+        function endGame() {
+            isGameActive = false;
+            isReviewMode = false;
+            reviewStatus.textContent = '';
+            inputArea.innerHTML = '';
+            document.querySelectorAll('.unit-btn').forEach(btn => btn.disabled = false);
+            checkBtn.disabled = true;
+            answerBtn.disabled = true;
+            repeatBtn.disabled = true;
+            startBtn.textContent = '重新開始';
+            hintDisplay.textContent = '👏 恭喜您！所有單字測驗和複習都已完成！';
+            feedbackMessage.textContent = '請選擇新的單元開始下一輪練習。';
+        }
+
+        // --- 語音 ---
+        function setEnglishVoice() {
+            if (englishVoice) return;
+            const voices = synth.getVoices();
+            englishVoice = voices.find(v => v.lang.startsWith('en-US') && v.name.includes('Female')) || voices.find(v => v.lang.startsWith('en'));
+        }
+        synth.onvoiceschanged = setEnglishVoice;
+        
+        function speak(text) {
+            synth.cancel();
+            setEnglishVoice();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.voice = englishVoice;
+            utter.rate = 0.9;
+            synth.speak(utter);
+            return utter;
+        }
+
+        function readWord(word) {
+            repeatBtn.disabled = true; 
+            speak(word).onend = () => repeatBtn.disabled = false;
+        }
+        
+        // --- 輸入與檢查 ---
+        function handleKeyClick(letter) {
+            if (!currentWord) return;
+            if (checkBtn.textContent === '🔄 重試') resetFullInput();
+            const pureWord = currentWord.replace(/\s/g, ''); 
+            if (currentSpelling.length < pureWord.length) {
+                currentSpelling.push(letter);
+                const slot = document.getElementById(`slot-${currentSpelling.length - 1}`);
+                slot.textContent = letter;
+                slot.classList.remove('correct', 'incorrect', 'skipped');
+            }
+            checkBtn.disabled = (currentSpelling.length !== pureWord.length);
+        }
+        
+        function handleDeleteClick() {
+            if (currentSpelling.length > 0) {
+                const lastIdx = currentSpelling.length - 1;
+                document.getElementById(`slot-${lastIdx}`).textContent = '';
+                currentSpelling.pop();
+                checkBtn.disabled = true;
+            }
+        }
+
+        function checkSpelling() {
+            checkBtn.disabled = true;
+            repeatBtn.disabled = true;
+            answerBtn.disabled = true; 
+            startBtn.disabled = true; 
+
+            const playerWord = currentSpelling.join('');
+            const pureWord = currentWord.replace(/\s/g, ''); 
+
+            if (playerWord === pureWord) {
+                feedbackMessage.textContent = '🍭 太棒了！拼寫完全正確！'; 
+                // 如果是從錯題本來的，答對了就移除
+                if (isReviewMode) removeFromWrongWordBook(currentWord);
+
+                for (let i = 0; i < pureWord.length; i++) document.getElementById(`slot-${i}`).classList.add('correct');
+                speak('Excellent!').onend = () => {
+                    setTimeout(() => { wordIndex++; loadNextWord(); }, 1000); 
+                };
+            } else {
+                feedbackMessage.textContent = '💡 錯囉！請檢查紅色錯誤。';
+                for (let i = 0; i < pureWord.length; i++) {
+                    const slot = document.getElementById(`slot-${i}`);
+                    if (currentSpelling[i] === pureWord[i]) slot.classList.add('correct');
+                    else if (currentSpelling[i]) slot.classList.add('incorrect');
+                }
+                const wordData = currentWordList[wordIndex];
+                if (!errorList.find(w => w.word === wordData.word)) errorList.push(wordData);
+                saveToWrongWordBook(wordData); // 存入錯題本
+                
+                resetForRetryState(); 
+                answerBtn.disabled = false; 
+                startBtn.disabled = false; 
+            }
+        }
+        
+        function resetForRetryState() {
+            currentSpelling = [];
+            checkBtn.textContent = '🔄 重試';
+            checkBtn.disabled = false;
+            checkBtn.onclick = resetFullInput;
+            repeatBtn.disabled = false; 
+        }
+
+         function resetFullInput() {
+            const pureWord = currentWord.replace(/\s/g, '');
+            for (let i = 0; i < pureWord.length; i++) {
+                const slot = document.getElementById(`slot-${i}`);
+                slot.textContent = '';
+                slot.classList.remove('correct', 'incorrect', 'skipped');
+            }
+            currentSpelling = [];
+            checkBtn.textContent = '✅ 檢查拼寫';
+            checkBtn.disabled = true;
+            checkBtn.onclick = checkSpelling;
+            feedbackMessage.textContent = '請重新拼寫。';
+         }
+
+        function showAnswer() {
+            checkBtn.disabled = true;
+            answerBtn.disabled = true; 
+            startBtn.disabled = true; 
+            const pureWord = currentWord.replace(/\s/g, '');
+            for (let i = 0; i < pureWord.length; i++) {
+                const slot = document.getElementById(`slot-${i}`);
+                slot.textContent = pureWord[i];
+                slot.classList.add('skipped');
+            }
+            feedbackMessage.textContent = `答案是 ${currentWord}。已加入待複習清單！`;
+            const wordData = currentWordList[wordIndex];
+            if (!errorList.find(w => w.word === wordData.word)) errorList.push(wordData);
+            saveToWrongWordBook(wordData); // 看答案也存入錯題本
+
+            speak(`The correct word is ${currentWord}`).onend = () => {
+                setTimeout(() => {
+                    startBtn.disabled = false;
+                    wordIndex++;
+                }, 1000);
+            };
+        }
+
+        function createKeyboard() {
+            const kb = document.getElementById('keyboard');
+            keys.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'key';
+                btn.textContent = letter;
+                btn.onclick = () => handleKeyClick(letter);
+                kb.appendChild(btn);
+            });
+            const del = document.createElement('button');
+            del.id = 'delete-key';
+            del.className = 'key';
+            del.textContent = 'DEL';
+            del.onclick = handleDeleteClick;
+            kb.appendChild(del);
+        }
+
+        window.onload = createKeyboard;
+        repeatBtn.onclick = () => readWord(currentWord); 
+    </script>
+</body>
+</html>
