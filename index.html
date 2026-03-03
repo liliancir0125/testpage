@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>英文聽寫練習機 (V5.5 小寫顯示版)</title>
+    <title>英文聽寫練習機 (V5.7 iPad 版)</title>
     <style>
-        /* 延用 V5.4 的鮮明高對比配色 */
         :root {
             --main-blue: #5CB8E6;
             --main-pink: #FFB3C1;
@@ -20,125 +19,122 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 20px; 
+            padding: 10px; 
             margin: 0;
-            color: var(--text-dark); 
+            color: var(--text-dark);
+            overflow-x: hidden; /* 防止橫向捲動 */
         }
 
         #game-container { 
-            width: 95%; 
-            max-width: 900px; 
-            border: 8px solid var(--main-blue); 
+            width: 98%; 
+            max-width: 1000px; /* iPad 橫放時可以更寬一點 */
+            border: 6px solid var(--main-blue); 
             background-color: var(--bg-light); 
-            border-radius: 30px; 
-            box-shadow: 0 10px 0px #A4D8F0; 
-            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 0px #A4D8F0; 
+            padding: 10px 20px; /* 縮小上下內邊距 */
             text-align: center; 
             box-sizing: border-box;
         }
 
-        h2 { color: var(--main-blue); margin-bottom: 20px; font-size: 26px; font-weight: 900; }
+        h2 { color: var(--main-blue); margin: 5px 0; font-size: 24px; font-weight: 900; }
         
         #selection-bar { 
             background: #F0F8FF; 
-            padding: 15px; 
-            border-radius: 20px; 
-            margin-bottom: 25px; 
+            padding: 8px; 
+            border-radius: 15px; 
+            margin-bottom: 10px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            gap: 12px; 
-            flex-wrap: wrap;
-            border: 3px solid var(--main-blue);
+            gap: 15px; 
+            border: 2px solid var(--main-blue);
         }
 
-        .control-label { font-weight: bold; font-size: 18px; color: #444; }
-        
-        select { 
-            padding: 10px; 
-            border-radius: 12px; 
-            border: 2px solid var(--main-blue); 
-            font-size: 18px; 
-            font-weight: bold;
-            background: white; 
-        }
+        .control-label { font-weight: bold; font-size: 16px; }
+        select { padding: 5px; border-radius: 8px; border: 2px solid var(--main-blue); font-size: 16px; font-weight: bold; }
         
         #review-book-btn { 
             background-color: var(--main-pink); 
             border: 2px solid #FF80AB; 
             color: #C2185B; 
             font-weight: bold; 
-            padding: 10px 20px; 
-            border-radius: 15px; 
-            cursor: pointer; 
-            font-size: 18px;
-            box-shadow: 0 4px 0px #F48FB1;
+            padding: 6px 15px; 
+            border-radius: 10px; 
+            cursor: pointer;
         }
         
         #input-area { 
             display: flex; 
             justify-content: center; 
             flex-wrap: wrap; 
-            gap: 12px; 
-            margin: 30px auto; 
-            min-height: 80px;
+            gap: 10px; 
+            margin: 10px auto; 
+            min-height: 65px;
         }
 
         .letter-slot { 
-            width: 50px; 
-            height: 65px; 
-            line-height: 60px; /* 稍微上移一點讓小寫字母視覺置中 */
-            font-size: 42px; /* 小寫字母稍微調大一點 */
+            width: 45px; 
+            height: 60px; 
+            line-height: 58px; 
+            font-size: 40px; 
             font-weight: bold; 
-            border: 4px solid var(--main-blue); 
-            border-radius: 12px; 
+            border: 3px solid var(--main-blue); 
+            border-radius: 10px; 
             background: #FFF; 
             color: var(--main-blue);
             text-align: center;
-            text-transform: lowercase; /* 強制格子內顯示小寫 */
         }
-        .space-slot { width: 20px; }
+        .space-slot { width: 15px; }
 
-        #hint-display { font-size: 26px; font-weight: bold; color: #E67E22; margin-bottom: 10px; min-height: 40px; }
+        #hint-display { font-size: 24px; font-weight: bold; color: #E67E22; margin-bottom: 5px; }
+        #feedback { font-size: 20px; font-weight: bold; color: #FF5252; min-height: 24px; margin-bottom: 5px; }
         
-        /* 鍵盤維持大寫 */
+        /* 鍵盤：A-Z 三行排序 */
         #keyboard { 
-            display: grid; 
-            grid-template-columns: repeat(7, 1fr); 
-            gap: 12px; 
-            margin: 25px auto; 
-            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 10px auto;
+            max-width: 900px;
         }
+        .kb-row { display: flex; justify-content: center; gap: 8px; }
+
         .key { 
             background-color: #A4E2FF; 
             border: none; 
-            padding: 18px 0; 
-            font-size: 26px; 
+            width: 60px; /* 固定寬度讓排列更整齊 */
+            height: 60px;
+            font-size: 28px; 
             font-weight: bold; 
-            border-radius: 15px; 
+            border-radius: 12px; 
             cursor: pointer; 
             color: white;
-            box-shadow: 0 5px 0px #5CB8E6;
+            box-shadow: 0 4px 0px #5CB8E6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        #delete-key { background-color: #999; box-shadow: 0 5px 0px #666; }
+        .key:active { transform: translateY(2px); box-shadow: 0 2px 0px #5CB8E6; }
+        #delete-key { width: 90px; background-color: #999; box-shadow: 0 4px 0px #666; }
         
         .control-btn { 
-            padding: 15px 25px; 
+            padding: 12px 25px; 
             font-size: 18px; 
             font-weight: bold; 
             border: none; 
-            border-radius: 20px; 
+            border-radius: 15px; 
             cursor: pointer; 
-            margin: 8px; 
+            margin: 0 5px; 
             color: white;
         }
-        #start-btn { background-color: #FF9F43; box-shadow: 0 5px 0px #E67E22; }
-        #repeat-btn { background-color: #4CAF50; box-shadow: 0 5px 0px #388E3C; }
-        #check-btn { background-color: var(--main-yellow); color: #856404; box-shadow: 0 5px 0px #FBC02D; }
-        #answer-btn { background-color: #00BCD4; box-shadow: 0 5px 0px #0097A7; }
-        
+        #start-btn { background-color: #FF9F43; box-shadow: 0 4px 0px #E67E22; }
+        #repeat-btn { background-color: #4CAF50; box-shadow: 0 4px 0px #388E3C; }
+        #check-btn { background-color: var(--main-yellow); color: #856404; box-shadow: 0 4px 0px #FBC02D; }
+        #answer-btn { background-color: #00BCD4; box-shadow: 0 4px 0px #0097A7; }
         .control-btn:disabled { opacity: 0.4; box-shadow: none; }
-        #feedback { font-size: 24px; font-weight: bold; margin: 15px 0; color: #FF5252; min-height: 30px; }
+        
+        #controls { margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -147,30 +143,30 @@
     <h2>✨ 英文聽寫練習機 ✨</h2>
     
     <div id="selection-bar">
-        <span class="control-label">範圍：</span>
-        <select id="start-unit-select"></select>
-        <span class="control-label">~</span>
-        <select id="end-unit-select"></select>
-        <button id="review-book-btn" onclick="startWrongWordMode()">🎯 挑戰錯題本 (0)</button>
+        <div>
+            <span class="control-label">範圍：</span>
+            <select id="start-unit-select"></select>
+            <span class="control-label">~</span>
+            <select id="end-unit-select"></select>
+        </div>
+        <button id="review-book-btn" onclick="startWrongWordMode()">🎯 錯題本 (0)</button>
     </div>
 
-    <div id="hint-display">點擊下方按鈕開始！</div>
+    <div id="hint-display">準備好了嗎？點擊開始！</div>
     <div id="feedback"></div>
-    
     <div id="input-area"></div>
 
     <div id="controls">
         <button id="start-btn" class="control-btn" onclick="startGame()">開始遊戲</button>
-        <button id="repeat-btn" class="control-btn" onclick="readWord(currentWord)" disabled>🔈 重複唸一遍</button>
-        <button id="check-btn" class="control-btn" onclick="checkSpelling()" disabled>✅ 拼寫檢查</button>
-        <button id="answer-btn" class="control-btn" onclick="showAnswer()" disabled>📖 看解答</button>
+        <button id="repeat-btn" class="control-btn" onclick="readWord(currentWord)" disabled>🔈 重唸</button>
+        <button id="check-btn" class="control-btn" onclick="checkSpelling()" disabled>✅ 檢查</button>
+        <button id="answer-btn" class="control-btn" onclick="showAnswer()" disabled>📖 解答</button>
     </div>
 
     <div id="keyboard"></div>
 </div>
 
 <script>
-    // 單字資料庫 (G1 & G2)
     const allWordUnits = {
         "G1": { "U1": [{word:"he is",hint:"他是"},{word:"i am",hint:"我是"},{word:"name",hint:"名字"},{word:"she is",hint:"她是"},{word:"the",hint:"這個"},{word:"this",hint:"這個"},{word:"you are",hint:"你是"},{word:"what",hint:"什麼"}], "U2": [{word:"that",hint:"那個"},{word:"and",hint:"和"},{word:"our",hint:"我們的"},{word:"her",hint:"她的"},{word:"his",hint:"他的"},{word:"my",hint:"我的"},{word:"open",hint:"打開"},{word:"your",hint:"你的"},{word:"they",hint:"他們"},{word:"close",hint:"關上"},{word:"we",hint:"我們"},{word:"their",hint:"他們的"}], "U3": [{word:"school",hint:"學校"},{word:"good",hint:"好的"},{word:"first grade",hint:"一年級"},{word:"hello",hint:"哈囉"},{word:"in",hint:"在"},{word:"no",hint:"不"},{word:"not",hint:"不"},{word:"too",hint:"也是"},{word:"who",hint:"誰"},{word:"yes",hint:"是"}], "U4": [{word:"white",hint:"白色"},{word:"orange",hint:"橘色"},{word:"black",hint:"黑色"},{word:"green",hint:"綠色"},{word:"yellow",hint:"黃色"},{word:"blue",hint:"藍色"},{word:"color",hint:"顏色"},{word:"pink",hint:"粉紅色"},{word:"red",hint:"紅色"},{word:"whose",hint:"誰的"}], "U5": [{word:"where",hint:"哪裡"},{word:"group",hint:"組"},{word:"there is",hint:"有 (單數)"},{word:"classroom",hint:"教室"},{word:"it",hint:"它"},{word:"there are",hint:"有 (複數)"},{word:"tell",hint:"告訴"},{word:"at",hint:"在於"},{word:"go",hint:"去"},{word:"on",hint:"在...上面"}], "U6": [{word:"draw",hint:"畫畫"},{word:"read",hint:"閱讀"},{word:"count",hint:"數數"},{word:"write",hint:"寫"},{word:"can",hint:"可以"},{word:"cant",hint:"不可以"},{word:"cannot",hint:"不可以"},{word:"eat",hint:"吃"},{word:"run",hint:"跑"},{word:"sleep",hint:"睡覺"}], "U7": [{word:"these",hint:"這些"},{word:"those",hint:"那些"},{word:"come to",hint:"來"},{word:"two",hint:"二"},{word:"walk to",hint:"走到"},{word:"by bus",hint:"搭公車"},{word:"four",hint:"四"},{word:"how",hint:"如何"},{word:"one",hint:"一"},{word:"three",hint:"三"}], "U8": [{word:"does",hint:"做"},{word:"homework",hint:"家庭作業"},{word:"doesnt",hint:"不 (doesn't)"},{word:"know",hint:"知道"},{word:"with",hint:"和"},{word:"dont",hint:"不 (don't)"},{word:"kick",hint:"踢"},{word:"lets",hint:"讓我們"},{word:"want to",hint:"想要"},{word:"jump",hint:"跳"},{word:"do",hint:"做"},{word:"play",hint:"玩"}], "U9": [{word:"eight",hint:"八"},{word:"eleven",hint:"十一"},{word:"what time",hint:"幾點鐘"},{word:"twelve",hint:"十二"},{word:"five",hint:"五"},{word:"for",hint:"給"},{word:"nine",hint:"九"},{word:"seven",hint:"七"},{word:"six",hint:"六"},{word:"ten",hint:"十"}], "U10": [{word:"windy",hint:"風大的"},{word:"dry",hint:"乾的"},{word:"warm",hint:"溫暖的"},{word:"rainy",hint:"下雨的"},{word:"cold",hint:"寒冷的"},{word:"hot",hint:"炎熱的"},{word:"or",hint:"或者"},{word:"sunny",hint:"晴朗的"},{word:"today",hint:"今天"},{word:"wet",hint:"潮濕的"}] },
         "G2": { "U1": [{word:"finger",hint:"手指頭"},{word:"thumb",hint:"大拇指"},{word:"body",hint:"身體"},{word:"toe",hint:"腳趾"},{word:"leg",hint:"腿"},{word:"back",hint:"背"},{word:"arm",hint:"手臂"},{word:"hand",hint:"手"},{word:"foot",hint:"腳 (單數)"},{word:"feet",hint:"腳 (複數)"},{word:"have",hint:"有(I/You/We)"},{word:"has",hint:"有(She/He/It)"}], "U2": [{word:"eye",hint:"眼睛"},{word:"ear",hint:"耳朵"},{word:"hair",hint:"頭髮"},{word:"mouth",hint:"嘴巴"},{word:"nose",hint:"鼻子"},{word:"big",hint:"大的"},{word:"little",hint:"小的"},{word:"short",hint:"短的"},{word:"long",hint:"長的"},{word:"now",hint:"現在"}], "U3": [{word:"coat",hint:"外套"},{word:"shirt",hint:"襯衫"},{word:"pants",hint:"褲子"},{word:"shorts",hint:"短褲"},{word:"skirt",hint:"裙子"},{word:"socks",hint:"襪子"},{word:"shoes",hint:"鞋子"},{word:"dress",hint:"洋裝"},{word:"sweater",hint:"毛衣"},{word:"glasses",hint:"眼鏡"}], "U4": [{word:"tired",hint:"疲倦的"},{word:"happy",hint:"快樂的"},{word:"sad",hint:"悲傷的"},{word:"bored",hint:"無聊的"},{word:"angry",hint:"生氣的"},{word:"crazy",hint:"瘋狂的"},{word:"hungry",hint:"肚子餓的"},{word:"thirsty",hint:"口渴的"},{word:"sick",hint:"生病的"},{word:"scared",hint:"害怕的"}], "U5": [{word:"december",hint:"十二月"},{word:"month",hint:"月"},{word:"january",hint:"一月"},{word:"february",hint:"二月"},{word:"march",hint:"三月"},{word:"april",hint:"四月"},{word:"may",hint:"五月"},{word:"june",hint:"六月"},{word:"july",hint:"七月"},{word:"august",hint:"八月"},{word:"september",hint:"九月"},{word:"october",hint:"十月"},{word:"november",hint:"十一月"}], "U6": [{word:"birthday",hint:"生日"},{word:"gift",hint:"禮物"},{word:"thanks",hint:"謝謝"},{word:"from",hint:"從.../來自"},{word:"us",hint:"我們 (受格)"},{word:"computer",hint:"電腦"},{word:"game",hint:"遊戲"},{word:"me",hint:"我 (受格)"},{word:"you",hint:"你(受格)"},{word:"him",hint:"他 (受格)"},{word:"them",hint:"他們 (受格)"},{word:"talk",hint:"說話"},{word:"sing",hint:"唱歌"},{word:"song",hint:"歌曲"},{word:"story",hint:"故事"}], "U7": [{word:"family",hint:"家庭"},{word:"brother",hint:"兄弟或弟"},{word:"sister",hint:"姊姊或妹"},{word:"people",hint:"人們(當複數用)"},{word:"father",hint:"父親"},{word:"aunt",hint:"姑姑或阿姨"},{word:"mother",hint:"母親"},{word:"uncle",hint:"伯父或叔叔"},{word:"cousin",hint:"堂(表)兄、弟、姊、妹"},{word:"grandfather",hint:"祖父"},{word:"grandmother",hint:"祖母"},{word:"many",hint:"很多的"},{word:"because",hint:"因為"}], "U8": [{word:"afraid",hint:"害怕的"},{word:"pet",hint:"寵物"},{word:"dog",hint:"狗"},{word:"but",hint:"但是"},{word:"like",hint:"喜歡"},{word:"cat",hint:"貓"},{word:"animal",hint:"動物"},{word:"hamster",hint:"倉鼠"},{word:"turtle",hint:"烏龜"},{word:"snake",hint:"蛇"},{word:"fish",hint:"魚"},{word:"bird",hint:"鳥"},{word:"lizard",hint:"蜥蜴"}], "U9": [{word:"kitchen",hint:"廚房"},{word:"doing",hint:"做"},{word:"bedroom",hint:"臥室"},{word:"bathroom",hint:"浴室"},{word:"dining room",hint:"飯廳"},{word:"study",hint:"書房"},{word:"living room",hint:"客廳"},{word:"reading",hint:"閱讀"},{word:"cooking",hint:"煮飯"},{word:"watching",hint:"看"},{word:"tv",hint:"電視"},{word:"sleeping",hint:"睡覺"},{word:"eating",hint:"吃"},{word:"washing",hint:"洗"},{word:"writing",hint:"寫"}], "U10": [{word:"desk",hint:"書桌"},{word:"under",hint:"在...下面"},{word:"bed",hint:"床"},{word:"table",hint:"桌子"},{word:"closet",hint:"衣櫥"},{word:"bathtub",hint:"浴缸"},{word:"sink",hint:"水槽"},{word:"chair",hint:"椅子"},{word:"refrigerator",hint:"冰箱"},{word:"stove",hint:"火爐"},{word:"sofa",hint:"沙發"},{word:"beside",hint:"在...旁邊"},{word:"put",hint:"放"}] }
@@ -180,6 +176,13 @@
     let isGameActive = false, isReviewMode = false, flatUnits = [];
     const synth = window.speechSynthesis;
     const praiseWords = ["Great job", "Excellent", "Amazing", "You are so smart", "Super star", "Well done", "Fantastic"];
+
+    // A-Z 三行佈局
+    const azLayout = [
+        "ABCDEFGHI",   // 9
+        "JKLMNOPQR",   // 9
+        "STUVWXYZ"    // 8 + DEL
+    ];
 
     function initSelection() {
         const startSel = document.getElementById('start-unit-select');
@@ -197,9 +200,34 @@
         updateWrongWordCount();
     }
 
+    function createKeyboard() {
+        const kbContainer = document.getElementById('keyboard');
+        kbContainer.innerHTML = '';
+        azLayout.forEach((rowString, index) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'kb-row';
+            rowString.split('').forEach(l => {
+                const b = document.createElement('button');
+                b.className = 'key';
+                b.textContent = l;
+                b.onclick = () => handleKeyClick(l);
+                rowDiv.appendChild(b);
+            });
+            if (index === 2) {
+                const del = document.createElement('button');
+                del.id = 'delete-key';
+                del.className = 'key';
+                del.textContent = 'DEL';
+                del.onclick = handleDelete;
+                rowDiv.appendChild(del);
+            }
+            kbContainer.appendChild(rowDiv);
+        });
+    }
+
     function updateWrongWordCount() {
         const book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
-        document.getElementById('review-book-btn').textContent = `🎯 挑戰錯題本 (${book.length})`;
+        document.getElementById('review-book-btn').textContent = `🎯 錯題本 (${book.length})`;
     }
 
     function startGame() {
@@ -233,13 +261,13 @@
             return;
         }
         const data = currentWordList[wordIndex];
-        currentWord = data.word.toLowerCase(); // 內部也轉小寫
+        currentWord = data.word.toLowerCase();
         currentSpelling = [];
         document.getElementById('input-area').innerHTML = '';
         document.getElementById('feedback').textContent = '';
         document.getElementById('start-btn').textContent = '下一個單字';
         document.getElementById('check-btn').disabled = true;
-        document.getElementById('check-btn').textContent = '✅ 拼寫檢查';
+        document.getElementById('check-btn').textContent = '✅ 檢查';
 
         const info = isReviewMode ? "挑戰中" : `${wordIndex+1}/${currentWordList.length}`;
         document.getElementById('hint-display').textContent = `[${info}] ${data.hint}`;
@@ -287,7 +315,7 @@
         currentSpelling = [];
         const target = currentWord.replace(/\s/g, '');
         for(let i=0; i<target.length; i++) { document.getElementById(`slot-${i}`).textContent = ''; }
-        document.getElementById('check-btn').textContent = '✅ 拼寫檢查';
+        document.getElementById('check-btn').textContent = '✅ 檢查';
         document.getElementById('check-btn').onclick = checkSpelling;
         document.getElementById('check-btn').disabled = true;
     }
@@ -308,7 +336,7 @@
 
     function handleRoundEnd() {
         if (errorList.length > 0) {
-            if (confirm(`練習結束！要複習錯題嗎？`)) {
+            if (confirm(`這輪練習結束！要複習錯題嗎？`)) {
                 currentWordList = [...errorList]; wordIndex = 0; errorList = [];
                 loadNextWord();
             } else { endGame(); }
@@ -336,7 +364,6 @@
         updateWrongWordCount();
     }
 
-    // --- 語音系統：統一轉小寫處理 ---
     function readWord(text) {
         synth.cancel();
         const voices = synth.getVoices();
@@ -348,11 +375,10 @@
         synth.speak(utter);
     }
 
-    // --- 鍵盤輸入：大寫按鍵輸入轉為小寫存儲 ---
     function handleKeyClick(l) {
         const target = currentWord.replace(/\s/g, '');
         if (currentSpelling.length < target.length) {
-            currentSpelling.push(l.toLowerCase()); // 存入小寫
+            currentSpelling.push(l.toLowerCase());
             document.getElementById(`slot-${currentSpelling.length-1}`).textContent = l.toLowerCase();
         }
         document.getElementById('check-btn').disabled = (currentSpelling.length !== target.length);
@@ -368,13 +394,7 @@
 
     window.onload = () => {
         initSelection();
-        const kb = document.getElementById('keyboard');
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(l => {
-            const b = document.createElement('button'); b.className = 'key'; b.textContent = l;
-            b.onclick = () => handleKeyClick(l); kb.appendChild(b);
-        });
-        const del = document.createElement('button'); del.id = 'delete-key'; del.className = 'key'; del.textContent = 'DEL';
-        del.onclick = handleDelete; kb.appendChild(del);
+        createKeyboard();
     };
 </script>
 </body>
