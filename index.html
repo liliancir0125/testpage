@@ -149,7 +149,7 @@
             <span class="control-label">~</span>
             <select id="end-unit-select"></select>
         </div>
-        <button id="review-book-btn" onclick="startWrongWordMode()">🎯 錯題本 (0)</button>
+        <button id="review-book-btn" onclick="startWrongWordMode()">📝 錯題本 (0)</button>
     </div>
 
     <div id="hint-display">準備好了嗎？點擊開始！</div>
@@ -157,9 +157,9 @@
     <div id="input-area"></div>
 
     <div id="controls">
-        <button id="start-btn" class="control-btn" onclick="startGame()">開始遊戲</button>
-        <button id="repeat-btn" class="control-btn" onclick="readWord(currentWord)" disabled>🔈 重唸</button>
-        <button id="check-btn" class="control-btn" onclick="checkSpelling()" disabled>✅ 檢查</button>
+        <button id="start-btn" class="control-btn" onclick="startGame()">💪 開始遊戲</button>
+        <button id="repeat-btn" class="control-btn" onclick="readWord(currentWord)" disabled>🔈 重複唸一遍</button>
+        <button id="check-btn" class="control-btn" onclick="checkSpelling()" disabled>✅ 拼寫檢查</button>
         <button id="answer-btn" class="control-btn" onclick="showAnswer()" disabled>📖 解答</button>
     </div>
 
@@ -227,11 +227,11 @@
 
     function updateWrongWordCount() {
         const book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
-        document.getElementById('review-book-btn').textContent = `🎯 錯題本 (${book.length})`;
+        document.getElementById('review-book-btn').textContent = `📝 錯題本 (${book.length})`;
     }
 
     function startGame() {
-        if (isGameActive && document.getElementById('start-btn').textContent === '下一個單字') {
+        if (isGameActive && document.getElementById('start-btn').textContent === '💪下一個單字') {
             handleSkip(); return;
         }
         const startIdx = parseInt(document.getElementById('start-unit-select').value);
@@ -265,9 +265,9 @@
         currentSpelling = [];
         document.getElementById('input-area').innerHTML = '';
         document.getElementById('feedback').textContent = '';
-        document.getElementById('start-btn').textContent = '下一個單字';
+        document.getElementById('start-btn').textContent = '💪下一個單字';
         document.getElementById('check-btn').disabled = true;
-        document.getElementById('check-btn').textContent = '✅ 檢查';
+        document.getElementById('check-btn').textContent = '✅ 拼寫檢查';
 
         const info = isReviewMode ? "挑戰中" : `${wordIndex+1}/${currentWordList.length}`;
         document.getElementById('hint-display').textContent = `[${info}] ${data.hint}`;
@@ -315,7 +315,7 @@
         currentSpelling = [];
         const target = currentWord.replace(/\s/g, '');
         for(let i=0; i<target.length; i++) { document.getElementById(`slot-${i}`).textContent = ''; }
-        document.getElementById('check-btn').textContent = '✅ 檢查';
+        document.getElementById('check-btn').textContent = '✅ 拼寫檢查';
         document.getElementById('check-btn').onclick = checkSpelling;
         document.getElementById('check-btn').disabled = true;
     }
