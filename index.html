@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>英文聽寫練習機 (V5.2 語音加強版)</title>
+    <title>英文聽寫練習機 (V5.3 鮮明讚美版)</title>
     <style>
-        /* 護眼吉伊卡哇配色 */
+        /* 鮮明配色：對比度提高，保護視力 */
         :root {
-            --soft-blue: #F0F8FF;
-            --chiikawa-blue: #B9D9EB;
-            --chiikawa-pink: #FADADD;
-            --chiikawa-yellow: #FEF9E7;
-            --border-color: #D1E9F6;
-            --text-dark: #5A5A5A;
+            --main-blue: #5CB8E6;    /* 小八貓藍 - 鮮明 */
+            --main-pink: #FFB3C1;    /* 錯題本粉 - 鮮明 */
+            --main-yellow: #FFD93D;  /* 小兔兔黃 - 鮮明 */
+            --bg-light: #FFFFFF;
+            --text-dark: #333333;
         }
 
         body { 
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
-            background-color: var(--soft-blue); 
+            background-color: #E1F4FF; /* 外圍背景淡藍 */
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -29,121 +28,127 @@
         #game-container { 
             width: 95%; 
             max-width: 900px; 
-            border: 6px solid white; 
-            background-color: white; 
+            border: 8px solid var(--main-blue); 
+            background-color: var(--bg-light); 
             border-radius: 30px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05); 
+            box-shadow: 0 10px 0px #A4D8F0; 
             padding: 25px; 
             text-align: center; 
             box-sizing: border-box;
         }
 
-        h2 { color: #8ECAE6; margin-bottom: 20px; font-size: 24px; letter-spacing: 2px; }
+        h2 { color: var(--main-blue); margin-bottom: 20px; font-size: 26px; font-weight: 900; }
         
+        /* 選單列：清晰好讀 */
         #selection-bar { 
-            background: #FDFDFD; 
+            background: #F0F8FF; 
             padding: 15px; 
             border-radius: 20px; 
             margin-bottom: 25px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            gap: 15px; 
+            gap: 12px; 
             flex-wrap: wrap;
-            border: 2px solid var(--soft-blue);
+            border: 3px solid var(--main-blue);
         }
 
-        .control-label { font-weight: bold; font-size: 16px; color: #888; }
+        .control-label { font-weight: bold; font-size: 18px; color: #444; }
         
         select { 
-            padding: 8px 12px; 
-            border-radius: 10px; 
-            border: 2px solid var(--border-color); 
-            font-size: 16px; 
+            padding: 10px; 
+            border-radius: 12px; 
+            border: 2px solid var(--main-blue); 
+            font-size: 18px; 
+            font-weight: bold;
             background: white; 
             color: var(--text-dark);
         }
         
         #review-book-btn { 
-            background-color: var(--chiikawa-pink); 
-            border: none; 
-            color: #D88; 
+            background-color: var(--main-pink); 
+            border: 2px solid #FF80AB; 
+            color: #C2185B; 
             font-weight: bold; 
             padding: 10px 20px; 
             border-radius: 15px; 
             cursor: pointer; 
-            font-size: 16px;
+            font-size: 18px;
+            box-shadow: 0 4px 0px #F48FB1;
         }
         
+        /* 單字格子：加深邊框 */
         #input-area { 
             display: flex; 
             justify-content: center; 
             flex-wrap: wrap; 
-            gap: 10px; 
+            gap: 12px; 
             margin: 30px auto; 
-            min-height: 70px;
-            max-width: 100%;
+            min-height: 80px;
         }
 
         .letter-slot { 
-            width: 45px; 
-            height: 60px; 
-            line-height: 60px; 
-            font-size: 32px; 
+            width: 50px; 
+            height: 65px; 
+            line-height: 65px; 
+            font-size: 38px; 
             font-weight: bold; 
-            border: 3px solid #E3F2FD; 
+            border: 4px solid var(--main-blue); 
             border-radius: 12px; 
-            background: #FBFDFF; 
-            color: #72A0C1;
+            background: #FFF; 
+            color: var(--main-blue);
             text-align: center;
         }
-        .space-slot { width: 15px; }
+        .space-slot { width: 20px; }
 
-        #hint-display { font-size: 24px; font-weight: bold; color: #8ECAE6; margin-bottom: 10px; min-height: 35px; }
+        #hint-display { font-size: 26px; font-weight: bold; color: #E67E22; margin-bottom: 10px; min-height: 40px; }
         
+        /* 鍵盤：顏色加深 */
         #keyboard { 
             display: grid; 
             grid-template-columns: repeat(7, 1fr); 
-            gap: 10px; 
+            gap: 12px; 
             margin: 25px auto; 
-            max-width: 600px;
+            max-width: 650px;
         }
         .key { 
-            background-color: #F0F4F8; 
+            background-color: #A4E2FF; 
             border: none; 
-            padding: 15px 0; 
-            font-size: 22px; 
+            padding: 18px 0; 
+            font-size: 26px; 
             font-weight: bold; 
-            border-radius: 12px; 
+            border-radius: 15px; 
             cursor: pointer; 
-            color: #90A4AE;
-            box-shadow: 0 3px 0px #CFD8DC;
+            color: white;
+            box-shadow: 0 5px 0px #5CB8E6;
         }
-        .key:active { transform: translateY(2px); box-shadow: none; }
-        #delete-key { background-color: #ECEFF1; color: #B0BEC5; }
+        .key:active { transform: translateY(3px); box-shadow: none; }
+        #delete-key { background-color: #999; box-shadow: 0 5px 0px #666; }
         
+        /* 控制按鈕：對比度提高 */
         .control-btn { 
-            padding: 12px 25px; 
-            font-size: 17px; 
+            padding: 15px 25px; 
+            font-size: 18px; 
             font-weight: bold; 
             border: none; 
-            border-radius: 18px; 
+            border-radius: 20px; 
             cursor: pointer; 
-            margin: 5px; 
+            margin: 8px; 
+            color: white;
         }
-        #start-btn { background-color: #FFD8A8; color: #D4803D; }
-        #repeat-btn { background-color: #D4EDDA; color: #5B8E7D; }
-        #check-btn { background-color: #FFF3CD; color: #856404; }
-        #answer-btn { background-color: #D1ECF1; color: #0C5460; }
+        #start-btn { background-color: #FF9F43; box-shadow: 0 5px 0px #E67E22; }
+        #repeat-btn { background-color: #4CAF50; box-shadow: 0 5px 0px #388E3C; }
+        #check-btn { background-color: var(--main-yellow); color: #856404; box-shadow: 0 5px 0px #FBC02D; }
+        #answer-btn { background-color: #00BCD4; box-shadow: 0 5px 0px #0097A7; }
         
-        .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        #feedback { font-size: 20px; font-weight: bold; margin: 15px 0; color: #E57373; min-height: 25px; }
+        .control-btn:disabled { opacity: 0.4; box-shadow: none; }
+        #feedback { font-size: 24px; font-weight: bold; margin: 15px 0; color: #FF5252; min-height: 30px; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h2>☁️ 英文拼字練習 ☁️</h2>
+    <h2>✨ 英文聽寫練習機 ✨</h2>
     
     <div id="selection-bar">
         <span class="control-label">範圍：</span>
@@ -153,7 +158,7 @@
         <button id="review-book-btn" onclick="startWrongWordMode()">🎯 挑戰錯題本 (0)</button>
     </div>
 
-    <div id="hint-display">請點擊開始遊戲</div>
+    <div id="hint-display">點擊下方按鈕開始！</div>
     <div id="feedback"></div>
     
     <div id="input-area"></div>
@@ -169,15 +174,18 @@
 </div>
 
 <script>
-    // 單字資料庫 (G1 & G2)
+    // 單字資料庫 (保持原始結構)
     const allWordUnits = {
         "G1": { "U1": [{word:"HE IS",hint:"他是"},{word:"I AM",hint:"我是"},{word:"NAME",hint:"名字"},{word:"SHE IS",hint:"她是"},{word:"THE",hint:"這個"},{word:"THIS",hint:"這個"},{word:"YOU ARE",hint:"你是"},{word:"WHAT",hint:"什麼"}], "U2": [{word:"THAT",hint:"那個"},{word:"AND",hint:"和"},{word:"OUR",hint:"我們的"},{word:"HER",hint:"她的"},{word:"HIS",hint:"他的"},{word:"MY",hint:"我的"},{word:"OPEN",hint:"打開"},{word:"YOUR",hint:"你的"},{word:"THEY",hint:"他們"},{word:"CLOSE",hint:"關上"},{word:"WE",hint:"我們"},{word:"THEIR",hint:"他們的"}], "U3": [{word:"SCHOOL",hint:"學校"},{word:"GOOD",hint:"好的"},{word:"FIRST GRADE",hint:"一年級"},{word:"HELLO",hint:"哈囉"},{word:"IN",hint:"在"},{word:"NO",hint:"不"},{word:"NOT",hint:"不"},{word:"TOO",hint:"也是"},{word:"WHO",hint:"誰"},{word:"YES",hint:"是"}], "U4": [{word:"WHITE",hint:"白色"},{word:"ORANGE",hint:"橘色"},{word:"BLACK",hint:"黑色"},{word:"GREEN",hint:"綠色"},{word:"YELLOW",hint:"黃色"},{word:"BLUE",hint:"藍色"},{word:"COLOR",hint:"顏色"},{word:"PINK",hint:"粉紅色"},{word:"RED",hint:"紅色"},{word:"WHOSE",hint:"誰的"}], "U5": [{word:"WHERE",hint:"哪裡"},{word:"GROUP",hint:"組"},{word:"THERE IS",hint:"有 (單數)"},{word:"CLASSROOM",hint:"教室"},{word:"IT",hint:"它"},{word:"THERE ARE",hint:"有 (複數)"},{word:"TELL",hint:"告訴"},{word:"AT",hint:"在於"},{word:"GO",hint:"去"},{word:"ON",hint:"在...上面"}], "U6": [{word:"DRAW",hint:"畫畫"},{word:"READ",hint:"閱讀"},{word:"COUNT",hint:"數數"},{word:"WRITE",hint:"寫"},{word:"CAN",hint:"可以"},{word:"CANT",hint:"不可以"},{word:"CANNOT",hint:"不可以"},{word:"EAT",hint:"吃"},{word:"RUN",hint:"跑"},{word:"SLEEP",hint:"睡覺"}], "U7": [{word:"THESE",hint:"這些"},{word:"THOSE",hint:"那些"},{word:"COME TO",hint:"來"},{word:"TWO",hint:"二"},{word:"WALK TO",hint:"走到"},{word:"BY BUS",hint:"搭公車"},{word:"FOUR",hint:"四"},{word:"HOW",hint:"如何"},{word:"ONE",hint:"一"},{word:"THREE",hint:"三"}], "U8": [{word:"DOES",hint:"做"},{word:"HOMEWORK",hint:"家庭作業"},{word:"DOESNT",hint:"不 (doesn't)"},{word:"KNOW",hint:"知道"},{word:"WITH",hint:"和"},{word:"DONT",hint:"不 (don't)"},{word:"KICK",hint:"踢"},{word:"LETS",hint:"讓我們"},{word:"WANT TO",hint:"想要"},{word:"JUMP",hint:"跳"},{word:"DO",hint:"做"},{word:"PLAY",hint:"玩"}], "U9": [{word:"EIGHT",hint:"八"},{word:"ELEVEN",hint:"十一"},{word:"WHAT TIME",hint:"幾點鐘"},{word:"TWELVE",hint:"十二"},{word:"FIVE",hint:"五"},{word:"FOR",hint:"給"},{word:"NINE",hint:"九"},{word:"SEVEN",hint:"七"},{word:"SIX",hint:"六"},{word:"TEN",hint:"十"}], "U10": [{word:"WINDY",hint:"風大的"},{word:"DRY",hint:"乾的"},{word:"WARM",hint:"溫暖的"},{word:"RAINY",hint:"下雨的"},{word:"COLD",hint:"寒冷的"},{word:"HOT",hint:"炎熱的"},{word:"OR",hint:"或者"},{word:"SUNNY",hint:"晴朗的"},{word:"TODAY",hint:"今天"},{word:"WET",hint:"潮濕的"}] },
-        "G2": { "U1": [{word:"FINGER",hint:"手指頭"},{word:"THUMB",hint:"大拇指"},{word:"BODY",hint:"身體"},{word:"TOE",hint:"腳趾"},{word:"LEG",hint:"腿"},{word:"BACK",hint:"背"},{word:"ARM",hint:"手臂"},{word:"HAND",hint:"手"},{word:"FOOT",hint:"腳 (單數)"},{word:"FEET",hint:"腳 (複數)"},{word:"HAVE",hint:"有(I/You/We)"},{word:"HAS",hint:"有(She/He/It)"}], "U2": [{word:"EYE",hint:"眼睛"},{word:"EAR",hint:"耳朵"},{word:"HAIR",hint:"頭髮"},{word:"MOUTH",hint:"嘴巴"},{word:"NOSE",hint:"鼻子"},{word:"BIG",hint:"大的"},{word:"LITTLE",hint:"小的"},{word:"SHORT",hint:"短的"},{word:"LONG",hint:"長的"},{word:"NOW",hint:"現在"}], "U3": [{word:"COAT",hint:"外套"},{word:"SHIRT",hint:"襯衫"},{word:"PANTS",hint:"褲子"},{word:"SHORTS",hint:"短褲"},{word:"SKIRT",hint:"裙子"},{word:"SOCKS",hint:"襪子"},{word:"SHOES",hint:"鞋子"},{word:"DRESS",hint:"洋裝"},{word:"SWEATER",hint:"毛衣"},{word:"GLASSES",hint:"眼鏡"}], "U4": [{word:"TIRED",hint:"疲倦的"},{word:"HAPPY",hint:"快樂的"},{word:"SAD",hint:"悲傷的"},{word:"BORED",hint:"無聊的"},{word:"ANGRY",hint:"生氣的"},{word:"CRAZY",hint:"瘋狂的"},{word:"HUNGRY",hint:"肚子餓的"},{word:"THIRSTY",hint:"口渴的"},{word:"SICK",hint:"生病的"},{word:"SCARED",hint:"害怕的"}], "U5": [{word:"DECEMBER",hint:"十二月"},{word:"MONTH",hint:"月"},{word:"JANUARY",hint:"一月"},{word:"FEBRUARY",hint:"二月"},{word:"MARCH",hint:"三月"},{word:"APRIL",hint:"四月"},{word:"MAY",hint:"五月"},{word:"JUNE",hint:"六月"},{word:"JULY",hint:"七月"},{word:"AUGUST",hint:"八月"},{word:"SEPTEMBER",hint:"九月"},{word:"OCTOBER",hint:"十月"},{word:"NOVEMBER",hint:"十一月"}], "U6": [{word:"BIRTHDAY",hint:"生日"},{word:"GIFT",hint:"禮物"},{word:"THANKS",hint:"謝謝"},{word:"FROM",hint:"從.../來自"},{word:"US",hint:"我們 (受格)"},{word:"COMPUTER",hint:"電腦"},{word:"GAME",hint:"遊戲"},{word:"ME",hint:"我 (受格)"},{word:"YOU",hint:"你(受格)"},{word:"HIM",hint:"他 (受格)"},{word:"THEM",hint:"他們 (受格)"},{word:"TALK",hint:"說話"},{word:"SING",hint:"唱歌"},{word:"SONG",hint:"歌曲"},{word:"STORY",hint:"故事"}], "U7": [{word:"FAMILY",hint:"家庭"},{word:"BROTHER",hint:"兄弟或弟"},{word:"SISTER",hint:"姊姊或妹"},{word:"PEOPLE",hint:"人們(當複數用)"},{word:"FATHER",hint:"父親"},{word:"AUNT",hint:"姑姑或阿姨"},{word:"MOTHER",hint:"母親"},{word:"UNCLE",hint:"伯父或叔叔"},{word:"COUSIN",hint:"堂(表)兄、弟、姊、妹"},{word:"GRANDFATHER",hint:"祖父"},{word:"GRANDMODHER",hint:"祖母"},{word:"MANY",hint:"很多的"},{word:"BECAUSE",hint:"因為"}], "U8": [{word:"AFRAID",hint:"害怕的"},{word:"PET",hint:"寵物"},{word:"DOG",hint:"狗"},{word:"BUT",hint:"但是"},{word:"LIKE",hint:"喜歡"},{word:"CAT",hint:"貓"},{word:"ANIMAL",hint:"動物"},{word:"HAMSTER",hint:"倉鼠"},{word:"TURTLE",hint:"烏龜"},{word:"SNAKE",hint:"蛇"},{word:"FISH",hint:"魚"},{word:"BIRD",hint:"鳥"},{word:"LIZARD",hint:"蜥蜴"}], "U9": [{word:"KITCHEN",hint:"廚房"},{word:"DOING",hint:"做"},{word:"BEDROOM",hint:"臥室"},{word:"BATHROOM",hint:"浴室"},{word:"DINING ROOM",hint:"飯廳"},{word:"STUDY",hint:"書房"},{word:"LIVING ROOM",hint:"客廳"},{word:"READING",hint:"閱讀"},{word:"COOKING",hint:"煮飯"},{word:"WATCHING",hint:"看"},{word:"TV",hint:"電視"},{word:"SLEEPING",hint:"睡覺"},{word:"EATING",hint:"吃"},{word:"WASHING",hint:"洗"},{word:"WRITING",hint:"寫"}], "U10": [{word:"DESK",hint:"書桌"},{word:"UNDER",hint:"在...下面"},{word:"BED",hint:"床"},{word:"TABLE",hint:"桌子"},{word:"CLOSET",hint:"衣櫥"},{word:"BATHTUB",hint:"浴缸"},{word:"SINK",hint:"水槽"},{word:"CHAIR",hint:"椅子"},{word:"REFRIGERATOR",hint:"冰箱"},{word:"STOVE",hint:"火爐"},{word:"SOFA",hint:"沙發"},{word:"BESIDE",hint:"在...旁邊"},{word:"PUT",hint:"放"}] }
+        "G2": { "U1": [{word:"FINGER",hint:"手指頭"},{word:"THUMB",hint:"大拇指"},{word:"BODY",hint:"身體"},{word:"TOE",hint:"腳趾"},{word:"LEG",hint:"腿"},{word:"BACK",hint:"背"},{word:"ARM",hint:"手臂"},{word:"HAND",hint:"手"},{word:"FOOT",hint:"腳 (單數)"},{word:"FEET",hint:"腳 (複數)"},{word:"HAVE",hint:"有(I/You/We)"},{word:"HAS",hint:"有(She/He/It)"}], "U2": [{word:"EYE",hint:"眼睛"},{word:"EAR",hint:"耳朵"},{word:"HAIR",hint:"頭髮"},{word:"MOUTH",hint:"嘴巴"},{word:"NOSE",hint:"鼻子"},{word:"BIG",hint:"大的"},{word:"LITTLE",hint:"小的"},{word:"SHORT",hint:"短的"},{word:"LONG",hint:"長的"},{word:"NOW",hint:"現在"}], "U3": [{word:"COAT",hint:"外套"},{word:"SHIRT",hint:"襯衫"},{word:"PANTS",hint:"褲子"},{word:"SHORTS",hint:"短褲"},{word:"SKIRT",hint:"裙子"},{word:"SOCKS",hint:"襪子"},{word:"SHOES",hint:"鞋子"},{word:"DRESS",hint:"洋裝"},{word:"SWEATER",hint:"毛衣"},{word:"GLASSES",hint:"眼鏡"}], "U4": [{word:"TIRED",hint:"疲倦的"},{word:"HAPPY",hint:"快樂的"},{word:"SAD",hint:"悲傷的"},{word:"BORED",hint:"無聊的"},{word:"ANGRY",hint:"生氣的"},{word:"CRAZY",hint:"瘋狂的"},{word:"HUNGRY",hint:"肚子餓的"},{word:"THIRSTY",hint:"口渴的"},{word:"SICK",hint:"生病的"},{word:"SCARED",hint:"害怕的"}], "U5": [{word:"DECEMBER",hint:"十二月"},{word:"MONTH",hint:"月"},{word:"JANUARY",hint:"一月"},{word:"FEBRUARY",hint:"二月"},{word:"MARCH",hint:"三月"},{word:"APRIL",hint:"四月"},{word:"MAY",hint:"五月"},{word:"JUNE",hint:"六月"},{word:"JULY",hint:"七月"},{word:"AUGUST",hint:"八月"},{word:"SEPTEMBER",hint:"九月"},{word:"OCTOBER",hint:"十月"},{word:"NOVEMBER",hint:"十一月"}], "U6": [{word:"BIRTHDAY",hint:"生日"},{word:"GIFT",hint:"禮物"},{word:"THANKS",hint:"謝謝"},{word:"FROM",hint:"從.../來自"},{word:"US",hint:"我們 (受格)"},{word:"COMPUTER",hint:"電腦"},{word:"GAME",hint:"遊戲"},{word:"ME",hint:"我 (受格)"},{word:"YOU",hint:"你(受格)"},{word:"HIM",hint:"他 (受格)"},{word:"THEM",hint:"他們 (受格)"},{word:"TALK",hint:"說話"},{word:"SING",hint:"唱歌"},{word:"SONG",hint:"歌曲"},{word:"STORY",hint:"故事"}], "U7": [{word:"FAMILY",hint:"家庭"},{word:"BROTHER",hint:"兄弟或弟"},{word:"SISTER",hint:"姊姊或妹"},{word:"PEOPLE",hint:"人們(當複數用)"},{word:"FATHER",hint:"父親"},{word:"AUNT",hint:"姑姑或阿姨"},{word:"MOTHER",hint:"母親"},{word:"UNCLE",hint:"伯父或叔叔"},{word:"COUSIN",hint:"堂(表)兄、弟、姊、妹"},{word:"GRANDFATHER",hint:"祖父"},{word:"GRANDMOTHER",hint:"祖母"},{word:"MANY",hint:"很多的"},{word:"BECAUSE",hint:"因為"}], "U8": [{word:"AFRAID",hint:"害怕的"},{word:"PET",hint:"寵物"},{word:"DOG",hint:"狗"},{word:"BUT",hint:"但是"},{word:"LIKE",hint:"喜歡"},{word:"CAT",hint:"貓"},{word:"ANIMAL",hint:"動物"},{word:"HAMSTER",hint:"倉鼠"},{word:"TURTLE",hint:"烏龜"},{word:"SNAKE",hint:"蛇"},{word:"FISH",hint:"魚"},{word:"BIRD",hint:"鳥"},{word:"LIZARD",hint:"蜥蜴"}], "U9": [{word:"KITCHEN",hint:"廚房"},{word:"DOING",hint:"做"},{word:"BEDROOM",hint:"臥室"},{word:"BATHROOM",hint:"浴室"},{word:"DINING ROOM",hint:"飯廳"},{word:"STUDY",hint:"書房"},{word:"LIVING ROOM",hint:"客廳"},{word:"READING",hint:"閱讀"},{word:"COOKING",hint:"煮飯"},{word:"WATCHING",hint:"看"},{word:"TV",hint:"電視"},{word:"SLEEPING",hint:"睡覺"},{word:"EATING",hint:"吃"},{word:"WASHING",hint:"洗"},{word:"WRITING",hint:"寫"}], "U10": [{word:"DESK",hint:"書桌"},{word:"UNDER",hint:"在...下面"},{word:"BED",hint:"床"},{word:"TABLE",hint:"桌子"},{word:"CLOSET",hint:"衣櫥"},{word:"BATHTUB",hint:"浴缸"},{word:"SINK",hint:"水槽"},{word:"CHAIR",hint:"椅子"},{word:"REFRIGERATOR",hint:"冰箱"},{word:"STOVE",hint:"火爐"},{word:"SOFA",hint:"沙發"},{word:"BESIDE",hint:"在...旁邊"},{word:"PUT",hint:"放"}] }
     };
 
     let currentWord = "", currentSpelling = [], currentWordList = [], wordIndex = 0, errorList = [];
     let isGameActive = false, isReviewMode = false, flatUnits = [];
     const synth = window.speechSynthesis;
+
+    // 隨機讚美詞清單
+    const praiseWords = ["Great job", "Excellent", "Amazing", "You are so smart", "Super star", "Well done", "Fantastic"];
 
     function initSelection() {
         const startSel = document.getElementById('start-unit-select');
@@ -206,7 +214,7 @@
         }
         const startIdx = parseInt(document.getElementById('start-unit-select').value);
         const endIdx = parseInt(document.getElementById('end-unit-select').value);
-        if (startIdx > endIdx) { alert("開始範圍要比結束範圍早喔！"); return; }
+        if (startIdx > endIdx) { alert("開始範圍要早於結束範圍喔！"); return; }
         currentWordList = [];
         for (let i = startIdx; i <= endIdx; i++) {
             const {grade, unit} = flatUnits[i];
@@ -219,7 +227,7 @@
 
     function startWrongWordMode() {
         const book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
-        if (book.length === 0) { alert("目前沒有錯題喔！"); return; }
+        if (book.length === 0) { alert("沒有錯題，好棒！"); return; }
         currentWordList = [...book].sort(() => Math.random() - 0.5);
         wordIndex = 0; errorList = []; isGameActive = true; isReviewMode = true;
         loadNextWord();
@@ -269,15 +277,19 @@
         const player = currentSpelling.join('');
         const target = currentWord.replace(/\s/g, '');
         if (player === target) {
-            document.getElementById('feedback').textContent = '🌸 答對了！真厲害！';
+            document.getElementById('feedback').textContent = '🌟 太棒了！拼寫正確！';
             if (isReviewMode) removeWrongWord(currentWord);
-            readWord("Great job"); // 答對時的音效
+            
+            // 隨機播放讚美
+            const praise = praiseWords[Math.floor(Math.random() * praiseWords.length)];
+            readWord(praise); 
+            
             setTimeout(() => { wordIndex++; loadNextWord(); }, 1200);
         } else {
-            document.getElementById('feedback').textContent = '☁️ 拼錯了，要再想一下嗎？';
+            document.getElementById('feedback').textContent = '💡 拼錯了，再試一次！';
             saveWrongWord(currentWordList[wordIndex]);
             if (!errorList.includes(currentWordList[wordIndex])) errorList.push(currentWordList[wordIndex]);
-            readWord("Try again"); // 答錯時的音效
+            readWord("Try again"); 
             document.getElementById('check-btn').textContent = '🔄 重試';
             document.getElementById('check-btn').onclick = resetInput;
         }
@@ -298,22 +310,19 @@
         const target = currentWord.replace(/\s/g, '');
         for(let i=0; i<target.length; i++) {
             document.getElementById(`slot-${i}`).textContent = target[i];
-            document.getElementById(`slot-${i}`).style.color = "#FFAB91";
+            document.getElementById(`slot-${i}`).style.color = "#FF5252";
         }
         saveWrongWord(currentWordList[wordIndex]);
         if (!errorList.includes(currentWordList[wordIndex])) errorList.push(currentWordList[wordIndex]);
         document.getElementById('feedback').textContent = `答案：${currentWord}`;
-        
-        // 看解答時，先說 "Let's see" 再唸單字
         readWord("Let's see");
         setTimeout(() => readWord(currentWord), 800);
-        
         setTimeout(() => { wordIndex++; loadNextWord(); }, 2500);
     }
 
     function handleRoundEnd() {
         if (errorList.length > 0) {
-            if (confirm(`練習結束！有 ${errorList.length} 個字要馬上複習嗎？`)) {
+            if (confirm(`這輪練習結束！有 ${errorList.length} 個字錯了，要複習嗎？`)) {
                 currentWordList = [...errorList]; wordIndex = 0; errorList = [];
                 loadNextWord();
             } else { endGame(); }
@@ -322,7 +331,7 @@
 
     function endGame() {
         isGameActive = false;
-        document.getElementById('hint-display').textContent = '🎈 今天的練習都完成了！';
+        document.getElementById('hint-display').textContent = '🎊 恭喜妳完成練習！';
         document.getElementById('start-btn').textContent = '重新開始';
         updateWrongWordCount();
     }
@@ -341,14 +350,15 @@
         updateWrongWordCount();
     }
 
+    // --- 語音參數設定 ---
     function readWord(text) {
         synth.cancel();
         const voices = synth.getVoices();
         const femaleVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Samantha')));
         const utter = new SpeechSynthesisUtterance(text);
         if (femaleVoice) utter.voice = femaleVoice;
-        utter.rate = 0.8; 
-        utter.pitch = 1.3; 
+        utter.rate = 0.8;   // 照要求設定為 0.8
+        utter.pitch = 1.25; // 照要求設定為 1.25
         synth.speak(utter);
     }
 
