@@ -2,228 +2,387 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英文聽寫練習機</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>英文聽寫練習機 順</title>
     <style>
-        :root { --main-blue: #5CB8E6; --main-pink: #FFB3C1; --bg-light: #FFFFFF; --text-dark: #333333; }
-        * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-        body { font-family: sans-serif; background-color: #E1F4FF; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; color: var(--main-blue); }
-        #game-container { width: 98%; max-width: 1000px; border: 6px solid var(--main-blue); background: var(--bg-light); border-radius: 20px; box-shadow: 0 5px 0px #A4D8F0; padding: 20px; text-align: center; }
-        #selection-bar { background: #F0F8FF; padding: 10px; border-radius: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 2px solid var(--main-blue); }
-        select { padding: 5px; border-radius: 8px; border: 2px solid var(--main-blue); font-weight: bold; }
-        #input-area { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 15px 0; min-height: 65px; }
-        .letter-slot { width: 42px; height: 60px; line-height: 58px; font-size: 38px; font-weight: bold; border: 3px solid var(--main-blue); border-radius: 10px; background: #FFF; }
-        .slot-correct { background: #C6EFCE !important; color: #006100 !important; border-color: #006100 !important; }
-        .slot-wrong { background: #FFC7CE !important; color: #9C0006 !important; border-color: #9C0006 !important; }
+        :root {
+            --main-blue: #5CB8E6;
+            --main-pink: #FFB3C1;
+            --main-yellow: #FFD93D;
+            --bg-light: #FFFFFF;
+            --text-dark: #333333;
+        }
+        * { 
+            touch-action: manipulation; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        body { 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            background-color: #E1F4FF; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 10px; 
+            margin: 0;
+            color: var(--main-blue);
+            overflow-x: hidden;
+        }
+        .slot-correct { background-color: #C6EFCE !important; color: #006100 !important; border-color: #006100 !important; }
+        .slot-wrong { background-color: #FFC7CE !important; color: #9C0006 !important; border-color: #9C0006 !important; }
+        
+        #game-container { 
+            width: 98%; max-width: 1000px; border: 6px solid var(--main-blue); 
+            background-color: var(--bg-light); border-radius: 20px; 
+            box-shadow: 0 5px 0px #A4D8F0; padding: 10px 20px; text-align: center; box-sizing: border-box;
+        }
+
+        #selection-bar { 
+            background: #F0F8FF;         /* 淺藍色背景 */
+            padding: 8px 15px; 
+            border-radius: 15px; 
+            margin-bottom: 15px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            border: 2px solid var(--main-blue); /* 藍色外框 */
+        }
+        /* 「範圍：」這三個字的字體與顏色 */
+        .control-label { 
+            font-weight: bold; 
+            font-size: 16px; 
+            color: var(--text-dark); 
+        }
+        
+        /* 下拉選單的設計：藍色外框、適中字體 */
+        select { 
+            padding: 5px; 
+            border-radius: 8px; 
+            border: 2px solid var(--main-blue); 
+            font-size: 16px; 
+            font-weight: bold; 
+            background: white; 
+        }
+        #input-area { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 10px auto; min-height: 65px; }
+        .letter-slot { width: 42px; height: 60px; line-height: 58px; font-size: 38px; font-weight: bold; border: 3px solid var(--main-blue); border-radius: 10px; background: #FFF; color: var(--main-blue); text-align: center; }
         .space-slot { width: 30px; }
-        #keyboard { display: flex; flex-direction: column; gap: 8px; }
-        .kb-row { display: flex; justify-content: center; gap: 6px; }
-        .key { background: #A4E2FF; border: none; width: 55px; height: 55px; font-size: 20px; font-weight: bold; border-radius: 10px; color: white; box-shadow: 0 4px 0px #5CB8E6; cursor: pointer; }
+
+        #hint-display { font-size: 24px; font-weight: bold; color: #E67E22; margin-bottom: 5px; }
+        #feedback { font-size: 20px; font-weight: bold; color: #FF5252; min-height: 24px; margin-bottom: 5px; }
+        
+        #keyboard { display: flex; flex-direction: column; gap: 10px; margin: 10px auto; max-width: 900px; }
+        .kb-row { display: flex; justify-content: center; gap: 8px; }
+        .key { background-color: #A4E2FF; border: none; width: 60px; height: 60px; font-size: 24px; font-weight: bold; border-radius: 12px; cursor: pointer; color: white; box-shadow: 0 4px 0px #5CB8E6; display: flex; align-items: center; justify-content: center; }
         .key:active { transform: translateY(2px); box-shadow: 0 2px 0px #5CB8E6; }
-        #controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .control-btn { padding: 12px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; color: white; }
+        #delete-key { width: 90px; background-color: #999; box-shadow: 0 4px 0px #666; }
+        
+        #controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .control-btn { flex: none; width: 140px; padding: 15px 10px; font-size: 18px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; color: white; }
+        
+        /* 配色設定 */
+        #nav-btn { background-color: #FF9F43; box-shadow: 0 4px 0px #E67E22; } /* 橘色 */
+        #repeat-btn { background-color: #4CAF50; box-shadow: 0 4px 0px #388E3C; } /* 綠色 */
+        #check-btn { background-color: #00BCD4; box-shadow: 0 4px 0px #0097A7; } /* 藍色 */
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h2>🦊 英文聽寫練習機</h2>
+    <h2>🦊 英文聽寫練習機 🎓</h2>
+    
     <div id="selection-bar">
-        <span>範圍：</span>
-        <select id="start-unit-select"></select> ~ <select id="end-unit-select"></select>
-        <button id="review-book-btn" onclick="startWrongWordMode()" style="background: var(--main-pink); border: 2px solid #FF80AB; color: #C2185B; border-radius: 10px; cursor: pointer;">📝 錯題本 (0)</button>
+        <span class="control-label">範圍：</span>
+        <select id="start-unit-select"></select>
+        <span>~</span><select id="end-unit-select"></select>
+        <button id="review-book-btn" onclick="startWrongWordMode()" style="background-color: var(--main-pink); border: 2px solid #FF80AB; color: #C2185B; font-weight: bold; padding: 6px 15px; border-radius: 10px; cursor: pointer;">📝 錯題本 (0)</button>
     </div>
     <div id="hint-display">準備好了嗎？點擊開始！</div>
-    <div id="feedback" style="height: 25px; margin: 10px; font-weight: bold; color: #FF5252;"></div>
+    <div id="feedback"></div>
     <div id="input-area"></div>
     <div id="controls">
-        <button id="nav-btn" class="control-btn" style="background:#FF9F43" onclick="handleNavAction()">🚀 開始遊戲</button>
-        <button id="repeat-btn" class="control-btn" style="background:#4CAF50" onclick="readWord(currentWord)" disabled>🔊 再聽一次</button>
-        <button id="check-btn" class="control-btn" style="background:#00BCD4" onclick="handleMainAction()" disabled>✅ 對答案</button>
+        <button id="nav-btn" class="control-btn" onclick="handleNavAction()">🚀 開始遊戲</button>
+        <button id="repeat-btn" class="control-btn" onclick="readWord(currentWord)" disabled>🔊 再聽一次</button>
+        <button id="check-btn" class="control-btn" onclick="handleMainAction()" disabled>✅ 對答案</button>
     </div>
     <div id="keyboard"></div>
 </div>
 
 <script>
-    let allWordUnits = {}, currentWord = "", currentSpelling = [], currentWordList = [], wordIndex = 0;
-    let isReviewMode = false, flatUnits = [];
+    let allWordUnits = {}, currentWord = "", currentWordList = [], wordIndex = 0, errorList = [], flatUnits = [];
+    let isGameActive = false, isReviewMode = false;
     const synth = window.speechSynthesis;
-    const PRAISE = ["Great job", "Excellent", "Well done"];
-
+    const praiseWords = ["Great job", "Excellent", "Amazing", "Well done"];
+    const azLayout = ["ABCDEFGHI", "JKLMNOPQR", "STUVWXYZ"];
+    
+    // 初始化選單
     function initSelection() {
-        const startSel = document.getElementById('start-unit-select'), endSel = document.getElementById('end-unit-select');
-        Object.entries(allWordUnits).forEach(([g, units]) => 
-            Object.keys(units).forEach(u => flatUnits.push({ grade: g, unit: u }))
-        );
+        const startSel = document.getElementById('start-unit-select');
+        const endSel = document.getElementById('end-unit-select');
+        
+        flatUnits = []; // 確保不重複疊加
+        ["G1", "G2"].forEach(g => {
+            if (allWordUnits[g]) {
+                Object.keys(allWordUnits[g]).forEach(u => flatUnits.push({ grade: g, unit: u }));
+            }
+        });
+    
         flatUnits.forEach((item, idx) => {
             const label = `${item.grade}-${item.unit}`;
-            startSel.add(new Option(label, idx)); endSel.add(new Option(label, idx));
+            startSel.add(new Option(label, idx));
+            endSel.add(new Option(label, idx));
         });
         updateWrongWordCount();
     }
-
+    
+    // 建立虛擬鍵盤
     function createKeyboard() {
         const kb = document.getElementById('keyboard');
-        ["ABCDEFGHI", "JKLMNOPQR", "STUVWXYZ"].forEach((row, idx) => {
-            const div = document.createElement('div'); div.className = 'kb-row';
+        kb.innerHTML = ''; 
+        azLayout.forEach((row, idx) => {
+            const div = document.createElement('div');
+            div.className = 'kb-row';
             row.split('').forEach(l => {
-                const b = document.createElement('button'); b.className = 'key'; b.textContent = l; 
-                b.onclick = () => {
-                    const idx = currentSpelling.findIndex(s => s === "");
-                    if (idx !== -1) {
-                        currentSpelling[idx] = l.toLowerCase();
-                        const slot = document.getElementById(`slot-${idx}`);
-                        slot.textContent = l.toLowerCase();
-                        document.getElementById('check-btn').disabled = false;
-                    }
-                };
+                const b = document.createElement('button');
+                b.className = 'key';
+                b.textContent = l;
+                b.onclick = () => handleKeyClick(l);
                 div.appendChild(b);
             });
             if (idx === 2) {
-                const del = document.createElement('button'); del.className = 'key'; del.style.width = '80px'; del.textContent = 'DEL';
-                del.onclick = () => {
-                    const idx = [...currentSpelling].reverse().findIndex(s => s !== "");
-                    if (idx !== -1) {
-                        const realIdx = currentSpelling.length - 1 - idx;
-                        const slot = document.getElementById(`slot-${realIdx}`);
-                        if (!slot.classList.contains('slot-correct')) {
-                            currentSpelling[realIdx] = ""; slot.textContent = "";
-                        }
-                    }
-                    document.getElementById('check-btn').disabled = !currentSpelling.some(s => s !== "");
-                };
+                const del = document.createElement('button');
+                del.id = 'delete-key';
+                del.className = 'key';
+                del.textContent = 'DEL';
+                del.onclick = handleDelete;
                 div.appendChild(del);
             }
             kb.appendChild(div);
         });
     }
-
+    
     function handleNavAction() {
-        if (document.getElementById('nav-btn').textContent.includes('開始')) startGame(); else handleSkip();
+        if (!isGameActive) {
+            startGame();
+            document.getElementById('nav-btn').textContent = '➡️ 下一個單字';
+            document.getElementById('repeat-btn').disabled = false;
+        } else {
+            handleSkip();
+        }
     }
-
+    
     function startGame() {
-        const s = +document.getElementById('start-unit-select').value, e = +document.getElementById('end-unit-select').value;
-        currentWordList = flatUnits.slice(s, e + 1).flatMap(u => allWordUnits[u.grade][u.unit]).sort(() => Math.random() - 0.5);
-        wordIndex = 0; isReviewMode = false;
-        document.getElementById('nav-btn').textContent = '➡️ 跳過/解答';
-        document.getElementById('repeat-btn').disabled = false;
+        const s = parseInt(document.getElementById('start-unit-select').value);
+        const e = parseInt(document.getElementById('end-unit-select').value);
+        if (s > e) return;
+    
+        currentWordList = [];
+        for (let i = s; i <= e; i++) {
+            const { grade, unit } = flatUnits[i];
+            currentWordList = currentWordList.concat(allWordUnits[grade][unit]);
+        }
+        currentWordList.sort(() => Math.random() - 0.5);
+        wordIndex = 0; errorList = []; isGameActive = true; isReviewMode = false;
         loadNextWord();
     }
-
+    
     function handleMainAction() {
         const btn = document.getElementById('check-btn');
         if (btn.textContent === '✅ 對答案') checkSpelling();
-        else { btn.textContent = '✅ 對答案'; resetWrongSlots(); }
+        else if (btn.textContent === '🔄 重試') {
+            resetInput();
+            btn.textContent = '✅ 對答案';
+            btn.disabled = true;
+        }
     }
-
+    
     function loadNextWord() {
-        if (wordIndex >= currentWordList.length) return endRound();
+        if (wordIndex >= currentWordList.length) {
+            isReviewMode ? endGame() : handleRoundEnd();
+            return;
+        }
+    
         const data = currentWordList[wordIndex];
         currentWord = data.word.toLowerCase();
-        currentSpelling = Array(currentWord.replace(/\s/g, '').length).fill("");
+        
         document.getElementById('input-area').innerHTML = '';
         document.getElementById('feedback').textContent = '';
         document.getElementById('check-btn').textContent = '✅ 對答案';
         document.getElementById('check-btn').disabled = true;
-        document.getElementById('hint-display').textContent = `[${wordIndex+1}/${currentWordList.length}] ${data.hint}`;
-        
+        document.getElementById('hint-display').textContent = `[${isReviewMode ? '複習' : (wordIndex + 1) + '/' + currentWordList.length}] ${data.hint}`;
+    
         let lIdx = 0;
         currentWord.split('').forEach(char => {
             if (char === ' ') {
-                const s = document.createElement('div'); s.className = 'space-slot'; document.getElementById('input-area').appendChild(s);
+                const s = document.createElement('div');
+                s.className = 'space-slot';
+                document.getElementById('input-area').appendChild(s);
             } else {
-                const div = document.createElement('div'); div.className = 'letter-slot'; div.id = `slot-${lIdx++}`; document.getElementById('input-area').appendChild(div);
+                const div = document.createElement('div');
+                div.className = 'letter-slot';
+                div.id = `slot-${lIdx++}`;
+                document.getElementById('input-area').appendChild(div);
             }
         });
         readWord(currentWord);
     }
-
+    
+    function handleKeyClick(l) {
+        // 直接找第一個還沒填內容的格子
+        const slots = document.querySelectorAll('.letter-slot');
+        const emptySlot = Array.from(slots).find(slot => !slot.textContent);
+        
+        if (emptySlot) {
+            emptySlot.textContent = l.toLowerCase();
+            emptySlot.classList.remove('slot-wrong');
+            document.getElementById('check-btn').disabled = false;
+        }
+    }
+    
+    function handleDelete() {
+        const slots = document.querySelectorAll('.letter-slot');
+        // 從後往前找，刪除第一個「有內容」且「不是正確（綠色）」的格子
+        for (let i = slots.length - 1; i >= 0; i--) {
+            if (slots[i].textContent && !slots[i].classList.contains('slot-correct')) {
+                slots[i].textContent = '';
+                slots[i].classList.remove('slot-wrong');
+                break;
+            }
+        }
+        const hasInput = Array.from(slots).some(s => s.textContent !== "");
+        document.getElementById('check-btn').disabled = !hasInput;
+    }
+    
     function checkSpelling() {
-        const target = currentWord.replace(/\s/g, '').toLowerCase();
+        const target = currentWord.replace(/\s/g, '');
+        const slots = document.querySelectorAll('.letter-slot');
         let allCorrect = true;
-        target.split('').forEach((char, i) => {
-            const slot = document.getElementById(`slot-${i}`);
-            if (currentSpelling[i] === char) slot.className = 'letter-slot slot-correct';
-            else { slot.className = 'letter-slot slot-wrong'; allCorrect = false; }
+    
+        slots.forEach((slot, i) => {
+            if (slot.textContent === target[i]) {
+                slot.className = 'letter-slot slot-correct';
+            } else {
+                slot.className = 'letter-slot slot-wrong';
+                allCorrect = false;
+            }
         });
-
+    
         if (allCorrect) {
             document.getElementById('feedback').textContent = '🌟 太棒了！';
             if (isReviewMode) removeWrongWord(currentWord);
-            readWord(PRAISE[Math.floor(Math.random() * PRAISE.length)]);
+            readWord(praiseWords[Math.floor(Math.random() * praiseWords.length)]);
             setTimeout(() => { wordIndex++; loadNextWord(); }, 1200);
         } else {
             document.getElementById('feedback').textContent = '💡 再試一次！';
-            saveWrongWord(currentWordList[wordIndex]);
+            const currentData = currentWordList[wordIndex];
+            saveWrongWord(currentData);
+            if (!errorList.includes(currentData)) errorList.push(currentData);
             readWord("Try again");
-            document.getElementById('check-btn').textContent = '🔄 重試';
+            const btn = document.getElementById('check-btn');
+            btn.textContent = '🔄 重試';
         }
     }
-
-    function resetWrongSlots() {
-        currentWord.replace(/\s/g, '').split('').forEach((char, i) => {
-            const slot = document.getElementById(`slot-${i}`);
-            if (!slot.classList.contains('slot-correct')) { slot.textContent = ''; slot.className = 'letter-slot'; currentSpelling[i] = ""; }
+    
+    function resetInput() {
+        const target = currentWord.replace(/\s/g, '');
+        document.querySelectorAll('.letter-slot').forEach((slot, i) => {
+            if (slot.textContent !== target[i]) {
+                slot.textContent = '';
+                slot.className = 'letter-slot';
+            }
         });
     }
-
+    
     function handleSkip() {
-        const target = currentWord.replace(/\s/g, '').toLowerCase();
-        target.split('').forEach((char, i) => {
-            const slot = document.getElementById(`slot-${i}`);
-            slot.textContent = char;
-            slot.className = `letter-slot ${currentSpelling[i] === char ? 'slot-correct' : 'slot-wrong'}`;
+        const target = currentWord.replace(/\s/g, '');
+        const slots = document.querySelectorAll('.letter-slot');
+        
+        slots.forEach((slot, i) => {
+            slot.textContent = target[i];
+            slot.className = (slot.textContent === target[i]) ? 'letter-slot slot-correct' : 'letter-slot slot-wrong';
         });
-        saveWrongWord(currentWordList[wordIndex]);
-        readWord("The answer is " + currentWord);
-        setTimeout(() => { wordIndex++; loadNextWord(); }, 2000);
+    
+        document.getElementById('feedback').textContent = `📝 已記錄在待複習清單裡`;
+        const currentData = currentWordList[wordIndex];
+        saveWrongWord(currentData);
+        if (!errorList.includes(currentData)) errorList.push(currentData);
+        
+        readWord("The answer is");
+        setTimeout(() => readWord(currentWord), 800);
+        setTimeout(() => { wordIndex++; loadNextWord(); }, 2500);
     }
-
+    
     function readWord(text) {
+        if (!text) return;
         synth.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.voice = synth.getVoices().find(v => v.lang.includes('en') && v.name.includes('Google')) || null;
-        utter.rate = 0.8; synth.speak(utter);
+        const utter = new SpeechSynthesisUtterance(text.toLowerCase());
+        const voices = synth.getVoices();
+        const f = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Samantha')));
+        if (f) utter.voice = f;
+        utter.rate = 0.8;
+        utter.pitch = 1.2;
+        synth.speak(utter);
     }
-
+    
     function updateWrongWordCount() {
-        const count = JSON.parse(localStorage.getItem('wrongWords') || '[]').length;
-        document.getElementById('review-book-btn').textContent = `📝 錯題本 (${count})`;
+        const book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
+        document.getElementById('review-book-btn').textContent = `📝 錯題本 (${book.length})`;
     }
-
+    
     function saveWrongWord(d) {
         let b = JSON.parse(localStorage.getItem('wrongWords') || '[]');
-        if (!b.find(w => w.word === d.word)) { b.push(d); localStorage.setItem('wrongWords', JSON.stringify(b)); updateWrongWordCount(); }
+        if (!b.find(w => w.word.toLowerCase() === d.word.toLowerCase())) {
+            b.push(d);
+            localStorage.setItem('wrongWords', JSON.stringify(b));
+            updateWrongWordCount();
+        }
     }
-
+    
     function removeWrongWord(t) {
-        let b = JSON.parse(localStorage.getItem('wrongWords') || '[]').filter(w => w.word.toLowerCase() !== t.toLowerCase());
-        localStorage.setItem('wrongWords', JSON.stringify(b)); updateWrongWordCount();
+        let b = JSON.parse(localStorage.getItem('wrongWords') || '[]');
+        b = b.filter(w => w.word.toLowerCase() !== t.toLowerCase());
+        localStorage.setItem('wrongWords', JSON.stringify(b));
+        updateWrongWordCount();
     }
-
-    function endRound() {
-        document.getElementById('hint-display').textContent = '🎊 練習完成！';
+    
+    function handleRoundEnd() {
+        if (errorList.length > 0 && confirm(`結束！有 ${errorList.length} 個字錯了，要現在複習嗎？`)) {
+            currentWordList = [...errorList];
+            wordIndex = 0; errorList = []; isReviewMode = true;
+            loadNextWord();
+        } else endGame();
+    }
+    
+    function endGame() {
+        isGameActive = false;
+        document.getElementById('hint-display').textContent = '🎊 恭喜妳完成練習！';
         document.getElementById('nav-btn').textContent = '🚀 開始遊戲';
-        document.getElementById('repeat-btn').disabled = document.getElementById('check-btn').disabled = true;
+        document.getElementById('repeat-btn').disabled = true;
+        document.getElementById('check-btn').disabled = true;
     }
-
+    
     function startWrongWordMode() {
         const b = JSON.parse(localStorage.getItem('wrongWords') || '[]');
-        if (!b.length) return alert("沒有錯題！");
+        if (b.length === 0) { alert("沒有錯題！"); return; }
         currentWordList = [...b].sort(() => Math.random() - 0.5);
-        wordIndex = 0; isReviewMode = true;
-        document.getElementById('nav-btn').textContent = '➡️ 跳過/解答';
+        wordIndex = 0; errorList = []; isGameActive = true; isReviewMode = true;
+        document.getElementById('nav-btn').textContent = '➡️ 下一個單字';
         document.getElementById('repeat-btn').disabled = false;
         loadNextWord();
     }
-
+    
     window.onload = async () => {
-        if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = () => synth.getVoices();
+        synth.getVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => synth.getVoices();
+        }
         try {
             const r = await fetch('https://raw.githubusercontent.com/liliancir0125/spell-game/refs/heads/main/word_bank.json');
-            allWordUnits = await r.json(); initSelection(); createKeyboard();
-        } catch (e) { document.getElementById('hint-display').textContent = "❌ 無法載入單字庫"; }
+            allWordUnits = await r.json();
+            initSelection();
+            createKeyboard();
+        } catch (e) {
+            document.getElementById('hint-display').textContent = "❌ 無法載入單字庫";
+        }
     };
 </script>
 </body>
