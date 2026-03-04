@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>英文聽寫練習機 (V5.7 iPad 版)</title>
+    <title>英文聽寫練習機 (V5.9 iPad 修正版)</title>
     <style>
         :root {
             --main-blue: #5CB8E6;
@@ -22,17 +22,17 @@
             padding: 10px; 
             margin: 0;
             color: var(--text-dark);
-            overflow-x: hidden; /* 防止橫向捲動 */
+            overflow-x: hidden;
         }
 
         #game-container { 
             width: 98%; 
-            max-width: 1000px; /* iPad 橫放時可以更寬一點 */
+            max-width: 1000px; 
             border: 6px solid var(--main-blue); 
             background-color: var(--bg-light); 
             border-radius: 20px; 
             box-shadow: 0 5px 0px #A4D8F0; 
-            padding: 10px 20px; /* 縮小上下內邊距 */
+            padding: 10px 20px; 
             text-align: center; 
             box-sizing: border-box;
         }
@@ -85,12 +85,10 @@
             color: var(--main-blue);
             text-align: center;
         }
-        .space-slot { width: 15px; }
 
         #hint-display { font-size: 24px; font-weight: bold; color: #E67E22; margin-bottom: 5px; }
         #feedback { font-size: 20px; font-weight: bold; color: #FF5252; min-height: 24px; margin-bottom: 5px; }
         
-        /* 鍵盤：A-Z 三行排序 */
         #keyboard { 
             display: flex;
             flex-direction: column;
@@ -103,7 +101,7 @@
         .key { 
             background-color: #A4E2FF; 
             border: none; 
-            width: 60px; /* 固定寬度讓排列更整齊 */
+            width: 60px; 
             height: 60px;
             font-size: 28px; 
             font-weight: bold; 
@@ -114,6 +112,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            touch-action: manipulation; /* 優化 iPad 觸控 */
         }
         .key:active { transform: translateY(2px); box-shadow: 0 2px 0px #5CB8E6; }
         #delete-key { width: 90px; background-color: #999; box-shadow: 0 4px 0px #666; }
@@ -127,39 +126,35 @@
             cursor: pointer; 
             margin: 0 5px; 
             color: white;
+            touch-action: manipulation;
         }
         #start-btn { background-color: #FF9F43; box-shadow: 0 4px 0px #E67E22; }
         #repeat-btn { background-color: #4CAF50; box-shadow: 0 4px 0px #388E3C; }
         #check-btn { background-color: var(--main-yellow); color: #856404; box-shadow: 0 4px 0px #FBC02D; }
         #answer-btn { background-color: #00BCD4; box-shadow: 0 4px 0px #0097A7; }
-        .control-btn:disabled { opacity: 0.4; box-shadow: none; }
-        
-        #controls { margin-bottom: 10px; }
+        .control-btn:disabled { opacity: 0.3; box-shadow: none; cursor: default; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h2>🐱 英文聽寫練習機 🐾</h2>
+    <h2>✨ 英文聽寫練習機 ✨</h2>
     
     <div id="selection-bar">
-        <div>
-            <span class="control-label">範圍：</span>
-            <select id="start-unit-select"></select>
-            <span class="control-label">~</span>
-            <select id="end-unit-select"></select>
-        </div>
-        <button id="review-book-btn" onclick="startWrongWordMode()">📝 錯題本 (0)</button>
+        <select id="start-unit-select"></select>
+        <span class="control-label">~</span>
+        <select id="end-unit-select"></select>
+        <button id="review-book-btn" onclick="startWrongWordMode()">🎯 錯題本 (0)</button>
     </div>
 
-    <div id="hint-display">準備好了嗎？點擊開始！</div>
+    <div id="hint-display">點擊開始練習！</div>
     <div id="feedback"></div>
     <div id="input-area"></div>
 
     <div id="controls">
-        <button id="start-btn" class="control-btn" onclick="startGame()">💪 開始遊戲</button>
-        <button id="repeat-btn" class="control-btn" onclick="readWord(currentWord)" disabled>🔈 重複唸一遍</button>
-        <button id="check-btn" class="control-btn" onclick="checkSpelling()" disabled>✅ 拼寫檢查</button>
+        <button id="start-btn" class="control-btn" onclick="startGame()">開始遊戲</button>
+        <button id="repeat-btn" class="control-btn" onclick="repeatTrigger()" disabled>🔈 重唸</button>
+        <button id="check-btn" class="control-btn" onclick="checkSpelling()" disabled>✅ 檢查</button>
         <button id="answer-btn" class="control-btn" onclick="showAnswer()" disabled>📖 解答</button>
     </div>
 
@@ -175,14 +170,6 @@
     let currentWord = "", currentSpelling = [], currentWordList = [], wordIndex = 0, errorList = [];
     let isGameActive = false, isReviewMode = false, flatUnits = [];
     const synth = window.speechSynthesis;
-    const praiseWords = ["Great job", "Excellent", "Amazing", "You are so smart", "Super star", "Well done", "Fantastic"];
-
-    // A-Z 三行佈局
-    const azLayout = [
-        "ABCDEFGHI",   // 9
-        "JKLMNOPQR",   // 9
-        "STUVWXYZ"    // 8 + DEL
-    ];
 
     function initSelection() {
         const startSel = document.getElementById('start-unit-select');
@@ -196,49 +183,45 @@
             startSel.add(new Option(label, idx));
             endSel.add(new Option(label, idx));
         });
-        endSel.selectedIndex = flatUnits.length - 1;
+        
+        // 預設選取 G1-U1 ~ G1-U1
+        startSel.selectedIndex = 0;
+        endSel.selectedIndex = 0;
         updateWrongWordCount();
     }
 
     function createKeyboard() {
         const kbContainer = document.getElementById('keyboard');
         kbContainer.innerHTML = '';
-        azLayout.forEach((rowString, index) => {
+        const layout = ["ABCDEFGHI", "JKLMNOPQR", "STUVWXYZ"];
+        layout.forEach((row, i) => {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'kb-row';
-            rowString.split('').forEach(l => {
+            row.split('').forEach(l => {
                 const b = document.createElement('button');
                 b.className = 'key';
                 b.textContent = l;
                 b.onclick = () => handleKeyClick(l);
                 rowDiv.appendChild(b);
             });
-            if (index === 2) {
-                const del = document.createElement('button');
-                del.id = 'delete-key';
-                del.className = 'key';
-                del.textContent = 'DEL';
-                del.onclick = handleDelete;
-                rowDiv.appendChild(del);
+            if (i === 2) {
+                const d = document.createElement('button');
+                d.id = 'delete-key'; d.className = 'key'; d.textContent = 'DEL';
+                d.onclick = handleDelete; rowDiv.appendChild(d);
             }
             kbContainer.appendChild(rowDiv);
         });
     }
 
-    function updateWrongWordCount() {
-        const book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
-        document.getElementById('review-book-btn').textContent = `📝 錯題本 (${book.length})`;
-    }
-
     function startGame() {
-        if (isGameActive && document.getElementById('start-btn').textContent === '💪下一個單字') {
+        if (isGameActive && document.getElementById('start-btn').textContent === '下一個單字') {
             handleSkip(); return;
         }
-        const startIdx = parseInt(document.getElementById('start-unit-select').value);
-        const endIdx = parseInt(document.getElementById('end-unit-select').value);
-        if (startIdx > endIdx) { alert("範圍錯誤！"); return; }
+        const s = parseInt(document.getElementById('start-unit-select').value);
+        const e = parseInt(document.getElementById('end-unit-select').value);
+        if (s > e) { alert("範圍錯誤"); return; }
         currentWordList = [];
-        for (let i = startIdx; i <= endIdx; i++) {
+        for (let i = s; i <= e; i++) {
             const {grade, unit} = flatUnits[i];
             currentWordList = currentWordList.concat(allWordUnits[grade][unit]);
         }
@@ -249,7 +232,7 @@
 
     function startWrongWordMode() {
         const book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
-        if (book.length === 0) { alert("沒有錯題！"); return; }
+        if (book.length === 0) return;
         currentWordList = [...book].sort(() => Math.random() - 0.5);
         wordIndex = 0; errorList = []; isGameActive = true; isReviewMode = true;
         loadNextWord();
@@ -257,20 +240,24 @@
 
     function loadNextWord() {
         if (wordIndex >= currentWordList.length) {
-            if (isReviewMode) endGame(); else handleRoundEnd();
-            return;
+            handleRoundEnd(); return;
         }
         const data = currentWordList[wordIndex];
         currentWord = data.word.toLowerCase();
         currentSpelling = [];
+        
         document.getElementById('input-area').innerHTML = '';
         document.getElementById('feedback').textContent = '';
-        document.getElementById('start-btn').textContent = '💪下一個單字';
+        document.getElementById('start-btn').textContent = '下一個單字';
+        
+        // 啟用功能按鈕
+        document.getElementById('repeat-btn').disabled = false;
+        document.getElementById('answer-btn').disabled = false;
         document.getElementById('check-btn').disabled = true;
-        document.getElementById('check-btn').textContent = '✅ 拼寫檢查';
+        document.getElementById('check-btn').textContent = '✅ 檢查';
+        document.getElementById('check-btn').onclick = checkSpelling;
 
-        const info = isReviewMode ? "挑戰中" : `${wordIndex+1}/${currentWordList.length}`;
-        document.getElementById('hint-display').textContent = `[${info}] ${data.hint}`;
+        document.getElementById('hint-display').textContent = `[${wordIndex+1}/${currentWordList.length}] ${data.hint}`;
 
         let lIdx = 0;
         currentWord.split('').forEach(char => {
@@ -285,11 +272,9 @@
         readWord(currentWord);
     }
 
-    function handleSkip() {
-        saveWrongWord(currentWordList[wordIndex]);
-        if (!errorList.includes(currentWordList[wordIndex])) errorList.push(currentWordList[wordIndex]);
-        wordIndex++;
-        loadNextWord();
+    function repeatTrigger() {
+        if (!currentWord) return;
+        readWord(currentWord);
     }
 
     function checkSpelling() {
@@ -298,13 +283,11 @@
         if (player === target) {
             document.getElementById('feedback').textContent = '🌟 太棒了！';
             if (isReviewMode) removeWrongWord(currentWord);
-            const praise = praiseWords[Math.floor(Math.random() * praiseWords.length)];
-            readWord(praise); 
+            readWord("Great job"); 
             setTimeout(() => { wordIndex++; loadNextWord(); }, 1200);
         } else {
             document.getElementById('feedback').textContent = '💡 再試一次！';
             saveWrongWord(currentWordList[wordIndex]);
-            if (!errorList.includes(currentWordList[wordIndex])) errorList.push(currentWordList[wordIndex]);
             readWord("Try again"); 
             document.getElementById('check-btn').textContent = '🔄 重試';
             document.getElementById('check-btn').onclick = resetInput;
@@ -313,9 +296,9 @@
 
     function resetInput() {
         currentSpelling = [];
-        const target = currentWord.replace(/\s/g, '');
-        for(let i=0; i<target.length; i++) { document.getElementById(`slot-${i}`).textContent = ''; }
-        document.getElementById('check-btn').textContent = '✅ 拼寫檢查';
+        const slots = document.getElementsByClassName('letter-slot');
+        for (let s of slots) s.textContent = '';
+        document.getElementById('check-btn').textContent = '✅ 檢查';
         document.getElementById('check-btn').onclick = checkSpelling;
         document.getElementById('check-btn').disabled = true;
     }
@@ -323,29 +306,24 @@
     function showAnswer() {
         const target = currentWord.replace(/\s/g, '');
         for(let i=0; i<target.length; i++) {
-            document.getElementById(`slot-${i}`).textContent = target[i];
-            document.getElementById(`slot-${i}`).style.color = "#FF5252";
+            const s = document.getElementById(`slot-${i}`);
+            if(s) { s.textContent = target[i]; s.style.color = "#FF5252"; }
         }
         saveWrongWord(currentWordList[wordIndex]);
-        if (!errorList.includes(currentWordList[wordIndex])) errorList.push(currentWordList[wordIndex]);
         document.getElementById('feedback').textContent = `答案：${currentWord}`;
-        readWord("Let's see");
-        setTimeout(() => readWord(currentWord), 800);
+        readWord(currentWord);
         setTimeout(() => { wordIndex++; loadNextWord(); }, 2500);
     }
 
-    function handleRoundEnd() {
-        if (errorList.length > 0) {
-            if (confirm(`這輪練習結束！要複習錯題嗎？`)) {
-                currentWordList = [...errorList]; wordIndex = 0; errorList = [];
-                loadNextWord();
-            } else { endGame(); }
-        } else { endGame(); }
+    function handleSkip() {
+        saveWrongWord(currentWordList[wordIndex]);
+        wordIndex++;
+        loadNextWord();
     }
 
-    function endGame() {
+    function handleRoundEnd() {
         isGameActive = false;
-        document.getElementById('hint-display').textContent = '🎊 恭喜妳完成練習！';
+        document.getElementById('hint-display').textContent = '🎊 練習完成！';
         document.getElementById('start-btn').textContent = '重新開始';
         updateWrongWordCount();
     }
@@ -357,6 +335,7 @@
             updateWrongWordCount();
         }
     }
+
     function removeWrongWord(text) {
         let book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
         book = book.filter(w => w.word.toLowerCase() !== text.toLowerCase());
@@ -364,14 +343,16 @@
         updateWrongWordCount();
     }
 
+    function updateWrongWordCount() {
+        const book = JSON.parse(localStorage.getItem('wrongWords') || '[]');
+        document.getElementById('review-book-btn').textContent = `🎯 錯題本 (${book.length})`;
+    }
+
     function readWord(text) {
         synth.cancel();
-        const voices = synth.getVoices();
-        const femaleVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Samantha')));
-        const utter = new SpeechSynthesisUtterance(text.toLowerCase()); 
-        if (femaleVoice) utter.voice = femaleVoice;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-US';
         utter.rate = 0.8;
-        utter.pitch = 1.25;
         synth.speak(utter);
     }
 
@@ -379,23 +360,22 @@
         const target = currentWord.replace(/\s/g, '');
         if (currentSpelling.length < target.length) {
             currentSpelling.push(l.toLowerCase());
-            document.getElementById(`slot-${currentSpelling.length-1}`).textContent = l.toLowerCase();
+            const s = document.getElementById(`slot-${currentSpelling.length-1}`);
+            if(s) s.textContent = l.toLowerCase();
         }
         document.getElementById('check-btn').disabled = (currentSpelling.length !== target.length);
     }
 
     function handleDelete() {
         if (currentSpelling.length > 0) {
-            document.getElementById(`slot-${currentSpelling.length-1}`).textContent = '';
+            const s = document.getElementById(`slot-${currentSpelling.length-1}`);
+            if(s) s.textContent = '';
             currentSpelling.pop();
             document.getElementById('check-btn').disabled = true;
         }
     }
 
-    window.onload = () => {
-        initSelection();
-        createKeyboard();
-    };
+    window.onload = () => { initSelection(); createKeyboard(); };
 </script>
 </body>
 </html>
