@@ -179,6 +179,7 @@
     <div id="keyboard"></div>
 </div>
 
+<script>
 let allWordUnits = {}, currentWord = "", currentSpelling = [], currentWordList = [], wordIndex = 0, errorList = [];
 let isGameActive = false, isReviewMode = false, flatUnits = [];
 const synth = window.speechSynthesis;
@@ -409,5 +410,6 @@ window.onload = async () => {
         allWordUnits = await r.json(); initSelection(); createKeyboard();
     } catch (e) { document.getElementById('hint-display').textContent = "❌ 無法載入單字庫"; }
 };
+</script>  
 </body>
 </html>
